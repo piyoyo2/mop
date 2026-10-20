@@ -587,7 +587,7 @@ export class AskTool implements AgentTool<typeof askSchema, AskToolDetails> {
 		const method = cfgAskNotify.get(this.session.settings);
 		if (method === "off") return;
 		TERMINAL.sendNotification({
-			title: "omp",
+			title: "mop",
 			body: "Waiting for input",
 			type: "ask",
 			urgency: "normal",

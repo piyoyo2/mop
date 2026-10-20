@@ -9,7 +9,7 @@
   - `packages/coding-agent/src/ida/settings.ts` — `ida.enabled`, `ida.python`, `ida.installDir`, `ida.maxOpen`, `ida.idleCloseSec` settings
   - `packages/coding-agent/src/ida/install.ts` — local install detection (`cfgIdaAvailable`, `cfgIdaInstall`)
   - `packages/coding-agent/src/ida/runtime.ts` — Python interpreter discovery (must import `ida_domain` + `idapro`)
-  - `packages/coding-agent/src/ida/store.ts` — executable sniffing, universal Mach-O slice selection, IDB location (`~/.omp/agent/idbs/<sha16>-<name>[.<arch>]/` or in place)
+  - `packages/coding-agent/src/ida/store.ts` — executable sniffing, universal Mach-O slice selection, IDB location (`~/.mop/agent/idbs/<sha16>-<name>[.<arch>]/` or in place)
   - `packages/coding-agent/src/ida/client.ts` — omp-side registry: starts/attaches hosts via the project broker, LRU eviction, request forwarding, flush on exit
   - `packages/coding-agent/src/ida/host.ts` — `omp.ida.<id>` daemon (`__omp_worker_ida_host`): IDB lock, socket server, SIGTERM save/close
   - `packages/coding-agent/src/ida/protocol.ts` — daemon naming, endpoints, host config and NDJSON wire schemas
@@ -80,7 +80,7 @@ Persistent per DB and shared by all agents. Preloaded: `db` (ida_domain `Databas
 - Hosts are non-persistent broker daemons: they stop (SIGTERM, 2 s grace) when the broker idles out after the project's last omp process exits. `omp ps kill` gives 100 ms, so unflushed changes are lost.
 - DBs idle for `ida.idleCloseSec` (default 900, `0` = never) are saved and closed and their host exits; reopening resets the `exec` namespace.
 - DBs are not tied to session disposal; they outlive compaction and subagents.
-- IDB store paths use the configured agent directory (`getAgentDir()`); `~/.omp/agent/idbs` is the ordinary default.
+- IDB store paths use the configured agent directory (`getAgentDir()`); `~/.mop/agent/idbs` is the ordinary default.
 - Each host holds the IDB's file lock; a host in another project opening the same IDB fails with `IDB <id> is in use by another omp process outside this project`.
 
 ## Errors

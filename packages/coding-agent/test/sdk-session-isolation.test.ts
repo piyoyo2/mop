@@ -446,8 +446,8 @@ describe("createAgentSession session storage isolation", () => {
 				existingKeySpy.mockRestore();
 			}
 
-			fs.mkdirSync(path.join(cwd, ".omp"), { recursive: true });
-			fs.writeFileSync(path.join(cwd, ".omp", "secrets.yml"), `- type: plain\n  content: ${configuredSecret}\n`);
+			fs.mkdirSync(path.join(cwd, ".mop"), { recursive: true });
+			fs.writeFileSync(path.join(cwd, ".mop", "secrets.yml"), `- type: plain\n  content: ${configuredSecret}\n`);
 
 			const withSecrets = await createAgentSession(commonOptions);
 			try {
@@ -467,9 +467,9 @@ describe("createAgentSession session storage isolation", () => {
 				tempDirs.push(tempDir);
 				const cwd = path.join(tempDir, "project");
 				const agentDir = path.join(tempDir, "agent");
-				fs.mkdirSync(path.join(cwd, ".omp"), { recursive: true });
+				fs.mkdirSync(path.join(cwd, ".mop"), { recursive: true });
 				fs.writeFileSync(
-					path.join(cwd, ".omp", "secrets.yml"),
+					path.join(cwd, ".mop", "secrets.yml"),
 					"- type: plain\n  content: sdk-secret-token-123456\n",
 				);
 
@@ -541,7 +541,7 @@ describe("createAgentSession session storage isolation", () => {
 			tempDirs.push(tempDir);
 			const cwd = path.join(tempDir, "project");
 			const agentDir = path.join(tempDir, "agent");
-			fs.mkdirSync(path.join(cwd, ".omp"), { recursive: true });
+			fs.mkdirSync(path.join(cwd, ".mop"), { recursive: true });
 
 			const commonOptions = {
 				cwd,
@@ -579,7 +579,7 @@ describe("createAgentSession session storage isolation", () => {
 				// Replace-mode secrets never build a reversible keyed placeholder, so
 				// startup must not create the key file; an existing key is still redacted.
 				fs.writeFileSync(
-					path.join(cwd, ".omp", "secrets.yml"),
+					path.join(cwd, ".mop", "secrets.yml"),
 					"- type: plain\n  mode: replace\n  content: replace-only-secret-123456\n",
 				);
 				const replaceOnly = await createAgentSession(commonOptions);
@@ -598,7 +598,7 @@ describe("createAgentSession session storage isolation", () => {
 				keySpy.mockClear();
 				existingKeySpy.mockClear();
 				fs.writeFileSync(
-					path.join(cwd, ".omp", "secrets.yml"),
+					path.join(cwd, ".mop", "secrets.yml"),
 					"- type: plain\n  content: obfuscate-secret-123456\n",
 				);
 				const withObfuscate = await createAgentSession(commonOptions);
@@ -621,11 +621,11 @@ describe("createAgentSession session storage isolation", () => {
 			tempDirs.push(tempDir);
 			const cwd = path.join(tempDir, "project");
 			const agentDir = path.join(tempDir, "agent");
-			fs.mkdirSync(path.join(cwd, ".omp"), { recursive: true });
+			fs.mkdirSync(path.join(cwd, ".mop"), { recursive: true });
 			// Only an ignored short (<8 char) plain obfuscate secret: it never becomes an
 			// active secret, but a previously-created key file must still be redacted and
 			// no new key must be created.
-			fs.writeFileSync(path.join(cwd, ".omp", "secrets.yml"), "- type: plain\n  content: abc\n");
+			fs.writeFileSync(path.join(cwd, ".mop", "secrets.yml"), "- type: plain\n  content: abc\n");
 
 			const keySpy = spyOn(secrets, "getSecretPlaceholderKey").mockImplementation(
 				async () => "test-placeholder-key",
@@ -671,9 +671,9 @@ describe("createAgentSession session storage isolation", () => {
 				tempDirs.push(tempDir);
 				const cwd = path.join(tempDir, "project");
 				const agentDir = path.join(tempDir, "agent");
-				fs.mkdirSync(path.join(cwd, ".omp"), { recursive: true });
+				fs.mkdirSync(path.join(cwd, ".mop"), { recursive: true });
 				fs.writeFileSync(
-					path.join(cwd, ".omp", "secrets.yml"),
+					path.join(cwd, ".mop", "secrets.yml"),
 					"- type: plain\n  content: agent-dir-secret-123456\n",
 				);
 

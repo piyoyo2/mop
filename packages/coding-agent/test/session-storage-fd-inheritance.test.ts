@@ -45,7 +45,7 @@ test.skipIf(process.platform !== "linux")("bash tool children never inherit sess
 	await fsp.mkdir(logsDir, { recursive: true });
 	const logSink = new RotatingFileSink({
 		directory: logsDir,
-		filenamePrefix: "omp",
+		filenamePrefix: "mop",
 		filenameSuffix: String(process.pid),
 		maxBytes: 1 << 20,
 		maxFiles: 2,

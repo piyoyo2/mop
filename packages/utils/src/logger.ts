@@ -1,7 +1,7 @@
 /**
  * Centralized logger for omp.
  *
- * Default: rotating `~/.omp/logs/omp.<DATE>.<PID>.log`, no console output (writing
+ * Default: rotating `~/.mop/logs/mop.<DATE>.<PID>.log`, no console output (writing
  * to stdout/stderr would corrupt the TUI). Long-running headless services
  * (the auth broker, etc.) call {@link setTransports} to swap in a console
  * transport so a process supervisor (pm2, journald, k8s) captures the logs.
@@ -58,11 +58,11 @@ function emitToSinks(level: LogLevel, message: string, context: Record<string, u
 	}
 }
 
-const PROCESS_LOG_PATTERN = /^omp\.(\d{4}-\d{2}-\d{2})\.(\d+)\.log(?:\.(\d+))?$/;
+const PROCESS_LOG_PATTERN = /^mop\.(\d{4}-\d{2}-\d{2})\.(\d+)\.log(?:\.(\d+))?$/;
 /** Per-process audit files written by earlier releases; current sinks track rotations in memory. */
-const PROCESS_AUDIT_PATTERN = /^\.omp\.(\d+)-audit\.json$/;
+const PROCESS_AUDIT_PATTERN = /^\.mop\.(\d+)-audit\.json$/;
 /** Shared daily logs (plain, size-rolled, or gzipped) written by the winston-era logger. */
-const LEGACY_LOG_PATTERN = /^omp\.(\d{4}-\d{2}-\d{2})\.log(?:\.\d+)?(?:\.gz)?$/;
+const LEGACY_LOG_PATTERN = /^(?:omp|mop)\.(\d{4}-\d{2}-\d{2})\.log(?:\.\d+)?(?:\.gz)?$/;
 /** Hash-named audit files written by winston-daily-rotate-file. */
 const LEGACY_AUDIT_PATTERN = /^\.[0-9a-f]{8,}-audit\.json$/;
 const RETAINED_STALE_LOGS_PER_PROCESS_DAY = 1;
@@ -304,7 +304,7 @@ function makeFileTransport(dir?: string): RotatingFileSink {
 	// The sink opens (and creates) its file on the first batch written.
 	return new RotatingFileSink({
 		directory: logsDir,
-		filenamePrefix: "omp",
+		filenamePrefix: "mop",
 		filenameSuffix: String(process.pid),
 		maxBytes: 10 * 1024 * 1024,
 		maxFiles: 5,

@@ -132,9 +132,9 @@ describe("createAgentSession MCP catalog handoff", () => {
 		// Discovery also reads user-level MCP config; point it at an empty home so
 		// only the fixture server is ever contacted.
 		const home = path.join(tempDir, "home");
-		fs.mkdirSync(path.join(home, ".omp", "agent"), { recursive: true });
+		fs.mkdirSync(path.join(home, ".mop", "agent"), { recursive: true });
 		originalAgentDir = getAgentDir();
-		setAgentDir(path.join(home, ".omp", "agent"));
+		setAgentDir(path.join(home, ".mop", "agent"));
 		spyOn(os, "homedir").mockReturnValue(home);
 	});
 

@@ -8,7 +8,7 @@
  * transports read. A field missing from either step silently degrades to the
  * snowflake-string default, which is the hang the option exists to avoid.
  *
- * Both OMP-native loaders are covered: `.omp/mcp.json` (native provider) and a
+ * Both OMP-native loaders are covered: `.mop/mcp.json` (native provider) and a
  * standalone project-root `.mcp.json` (mcp-json provider).
  *
  * Separately, `isSameMCPConnection` treats two differently-named entries with the
@@ -69,8 +69,8 @@ async function loadFrom(file: string, mcpServers: Record<string, unknown>) {
 	return configs;
 }
 
-test("requestIdFormat from .omp/mcp.json reaches the transport config", async () => {
-	const configs = await loadFrom(path.join(".omp", "mcp.json"), {
+test("requestIdFormat from .mop/mcp.json reaches the transport config", async () => {
+	const configs = await loadFrom(path.join(".mop", "mcp.json"), {
 		xcode: { type: "stdio", command: "/usr/bin/xcrun", args: ["mcpbridge"], requestIdFormat: "number" },
 		plain: { type: "stdio", command: "/bin/echo" },
 	});
@@ -89,7 +89,7 @@ test("requestIdFormat from a standalone .mcp.json reaches the transport config",
 });
 
 test("differing requestIdFormat prevents equivalence dedup from collapsing two aliases", async () => {
-	const configs = await loadFrom(path.join(".omp", "mcp.json"), {
+	const configs = await loadFrom(path.join(".mop", "mcp.json"), {
 		"xcode-string": { type: "stdio", command: "/usr/bin/xcrun", args: ["mcpbridge"], requestIdFormat: "string" },
 		"xcode-default": { type: "stdio", command: "/usr/bin/xcrun", args: ["mcpbridge"] },
 	});
@@ -105,7 +105,7 @@ test("differing requestIdFormat prevents equivalence dedup from collapsing two a
 });
 
 test('an explicit "number" is the default, so dedup collapses it with an unset alias', async () => {
-	const configs = await loadFrom(path.join(".omp", "mcp.json"), {
+	const configs = await loadFrom(path.join(".mop", "mcp.json"), {
 		"xcode-numeric": { type: "stdio", command: "/usr/bin/xcrun", args: ["mcpbridge"], requestIdFormat: "number" },
 		"xcode-default": { type: "stdio", command: "/usr/bin/xcrun", args: ["mcpbridge"] },
 	});
@@ -116,7 +116,7 @@ test('an explicit "number" is the default, so dedup collapses it with an unset a
 });
 
 for (const [provider, file] of [
-	["native", ".omp/mcp.json"],
+	["native", ".mop/mcp.json"],
 	["standalone", ".mcp.json"],
 	["plugin", "plugin/.mcp.json"],
 ] as const) {
@@ -157,7 +157,7 @@ for (const [provider, file] of [
 }
 
 test("instructions does not split one endpoint into two connections", async () => {
-	const configs = await loadFrom(".omp/mcp.json", {
+	const configs = await loadFrom(".mop/mcp.json", {
 		quiet: { command: "/bin/echo", instructions: false },
 		loud: { command: "/bin/echo" },
 	});

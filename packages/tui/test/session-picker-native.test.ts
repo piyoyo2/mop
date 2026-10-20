@@ -22,7 +22,7 @@ const HOUR = 3_600_000;
 
 function session(id: string, title: string, ageMs: number, cwd = "/work/app"): SessionSelectorEntry {
 	return {
-		path: `${cwd}/.omp/${id}.jsonl`,
+		path: `${cwd}/.mop/${id}.jsonl`,
 		id,
 		cwd,
 		title,

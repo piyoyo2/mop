@@ -26,6 +26,7 @@ import "./claude-md";
 import "./custom-context-files";
 import "./builtin";
 import "./builtin-defaults";
+import "../skills/bundled";
 import "./claude";
 import "./claude-plugins";
 import "./cline";

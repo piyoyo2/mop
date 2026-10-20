@@ -112,7 +112,7 @@ describe("createAcpSessionFactory MCP isolation (issue #1234)", () => {
 			const firedPath = tempDir.join("trusted-event-fired");
 			const ambientFiredPath = tempDir.join("ambient-extension-loaded");
 			await Bun.write(
-				tempDir.join(".omp/extensions/ambient.ts"),
+				tempDir.join(".mop/extensions/ambient.ts"),
 				`import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(ambientFiredPath)}, "loaded"); export default function () {}`,
 			);
 			await Bun.write(
@@ -194,7 +194,7 @@ describe("createAcpSessionFactory TITLE_SYSTEM.md per-cwd resolution (PR #3736)"
 			const settings = Settings.isolated({});
 
 			const projectDir = tempDir.join("project");
-			await Bun.write(`${projectDir}/.omp/TITLE_SYSTEM.md`, "Project-specific title policy.");
+			await Bun.write(`${projectDir}/.mop/TITLE_SYSTEM.md`, "Project-specific title policy.");
 
 			const fakeSession = {} as AgentSession;
 			const captured: CreateAgentSessionOptions[] = [];

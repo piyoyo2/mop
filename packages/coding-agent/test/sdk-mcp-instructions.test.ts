@@ -81,7 +81,7 @@ describe("createAgentSession MCP server instructions (deferred UI)", () => {
 	beforeAll(async () => {
 		isolatedHome = path.join(os.tmpdir(), `pi-sdk-mcp-instr-home-${Snowflake.next()}`);
 		fs.mkdirSync(isolatedHome, { recursive: true });
-		isolatedAgentDir = path.join(isolatedHome, ".omp", "agent");
+		isolatedAgentDir = path.join(isolatedHome, ".mop", "agent");
 		fs.mkdirSync(isolatedAgentDir, { recursive: true });
 		originalAgentDir = getAgentDir();
 		setAgentDir(isolatedAgentDir);

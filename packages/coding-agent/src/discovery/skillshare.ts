@@ -2,8 +2,8 @@
  * Skillshare Provider
  *
  * Loads registry skills pinned by `skills.lock.json` from the unpacked store
- * (`~/.omp/skillshare/@scope/name/<version>/`). Project locks are found by
- * walking up from cwd like native `.omp/skills` (closest first); the user lock
+ * (`~/.mop/skillshare/@scope/name/<version>/`). Project locks are found by
+ * walking up from cwd like native `.mop/skills` (closest first); the user lock
  * lives in the agent dir. Priority 95 sits just below native (100) so authored
  * skills win name collisions.
  */

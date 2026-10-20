@@ -127,7 +127,7 @@ a viewer link. Implementation: [`../packages/coding-agent/src/export/share.ts`](
 ### TUI phase 1: custom share handler (if present)
 
 The interactive TUI's `loadCustomShare()` checks the active agent directory
-(default `~/.omp/agent`) for the first existing candidate:
+(default `~/.mop/agent`) for the first existing candidate:
 
 - `share.ts`
 - `share.js`

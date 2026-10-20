@@ -243,7 +243,7 @@ describe("searchCodex model selection", () => {
 	}
 
 	// Every registry below is pointed at a temp `models.yml`. Without it the
-	// constructor reads the host `~/.omp/agent/models.yml`, and a configured
+	// constructor reads the host `~/.mop/agent/models.yml`, and a configured
 	// `openai-codex` apiKey there replaces the env bearer under test with a
 	// config-sourced key, so the suite fails on exactly the machines it is
 	// meant to protect. Keep this path explicit when adding registries.

@@ -164,7 +164,7 @@ Because dedup is “first seen wins”, provider-local item order matters.
 - Gemini loader appends **user first**, then **project**.
 - Therefore, duplicate names between `~/.gemini/extensions` and `<cwd>/.gemini/extensions` keep the user entry and shadow the project entry.
 
-By contrast, the native provider scans `<cwd>/.omp/extensions` before
+By contrast, the native provider scans `<cwd>/.mop/extensions` before
 `<getAgentDir()>/extensions`, so native intra-provider shadowing is
 project-first. It also reads `gemini-extension.json`, but skips dot-prefixed
 child directories and uses `manifest.name || directoryName` rather than `??`.

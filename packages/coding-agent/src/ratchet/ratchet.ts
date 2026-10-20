@@ -5,7 +5,7 @@
  * completeness and held-out leakage checks, and the round decision — so the
  * kernel facade only forwards arguments.
  *
- * On-disk layout (`.omp/ratchet/<flow>/`) follows the claude-api skill's eval
+ * On-disk layout (`.mop/ratchet/<flow>/`) follows the claude-api skill's eval
  * layout so its report builders can read it: `_state.json`, `baseline/`,
  * `v<N>/` each holding `results.jsonl`, optional `errors.jsonl`, and
  * `traces/<id>_rep<k>.json` (train cases only).
@@ -14,9 +14,9 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { calculateUsageCost } from "@oh-my-pi/pi-catalog/models";
 import type { ModelCost, Usage } from "@oh-my-pi/pi-catalog/types";
-import { isEnoent, isRecord } from "@oh-my-pi/pi-utils";
+import { CONFIG_DIR_NAME, isEnoent, isRecord } from "@oh-my-pi/pi-utils";
 
-export const RATCHET_ROOT = path.join(".omp", "ratchet");
+export const RATCHET_ROOT = path.join(CONFIG_DIR_NAME, "ratchet");
 export const RATCHET_STAGES = ["inputs", "grader", "plan"] as const;
 export type RatchetStage = (typeof RATCHET_STAGES)[number];
 export type Direction = "higher" | "lower";

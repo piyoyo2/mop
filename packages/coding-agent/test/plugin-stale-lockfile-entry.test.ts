@@ -31,7 +31,7 @@ test("stale lockfile-only directory plugin is skipped while declared and linked 
 	tempRoots.push(root);
 	const home = path.join(root, "home");
 	const cwd = path.join(root, "project");
-	const pluginsDir = path.join(home, ".omp", "plugins");
+	const pluginsDir = path.join(home, ".mop", "plugins");
 	const nodeModules = path.join(pluginsDir, "node_modules");
 	await fs.mkdir(cwd, { recursive: true });
 
@@ -86,7 +86,7 @@ test("manifest-less project roots retain lockfile-only directory plugins", async
 	tempRoots.push(root);
 	const home = path.join(root, "home");
 	const cwd = path.join(root, "project");
-	const pluginsDir = path.join(cwd, ".omp", "plugins");
+	const pluginsDir = path.join(cwd, ".mop", "plugins");
 	const installedDir = path.join(pluginsDir, "node_modules", "project-plugin");
 	await fs.mkdir(installedDir, { recursive: true });
 	await writeJson(path.join(installedDir, "package.json"), {

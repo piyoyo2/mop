@@ -19,12 +19,12 @@ A **plugin** is a directory containing Claude/OMP plugin content such as skills,
 
 **Scopes**: marketplace plugins can be installed at two scopes:
 
-- **user** (default) -- available in all projects, stored in the user plugins data root's `installed_plugins.json` (`~/.omp/plugins/installed_plugins.json` by default)
-- **project** -- available only in the active project, stored in `.omp/plugins/installed_plugins.json` under the nearest ancestor with `.omp/`, or the nearest Git root if no `.omp/` exists. An explicit project install can create this tree in cwd when neither anchor exists; the home directory is not treated as a project.
+- **user** (default) -- available in all projects, stored in the user plugins data root's `installed_plugins.json` (`~/.mop/plugins/installed_plugins.json` by default)
+- **project** -- available only in the active project, stored in `.mop/plugins/installed_plugins.json` under the nearest ancestor with `.mop/`, or the nearest Git root if no `.mop/` exists. An explicit project install can create this tree in cwd when neither anchor exists; the home directory is not treated as a project.
 
 Enabled project-scoped installs shadow enabled user-scoped installs of the same plugin. A disabled project install does not shadow the user install.
 
-On Linux and macOS, `omp config init-xdg` initializes the XDG data, state, and cache roots; it does not move existing data. With `XDG_DATA_HOME` set and its `omp/` directory initialized, user marketplace/plugin state resolves under `$XDG_DATA_HOME/omp` (including `marketplaces.json` and `plugins/`). Named profiles use their own roots; XDG routing requires the corresponding `omp/profiles/<name>/` directory. The `~/.omp` paths below are the default-profile, non-XDG defaults.
+On Linux and macOS, `omp config init-xdg` initializes the XDG data, state, and cache roots; it does not move existing data. With `XDG_DATA_HOME` set and its `omp/` directory initialized, user marketplace/plugin state resolves under `$XDG_DATA_HOME/omp` (including `marketplaces.json` and `plugins/`). Named profiles use their own roots; XDG routing requires the corresponding `omp/profiles/<name>/` directory. The `~/.mop` paths below are the default-profile, non-XDG defaults.
 
 On first XDG registry resolution, an existing config-root `marketplaces.json` is copied best-effort if the XDG target is absent; the old file remains. Plugin installation trees are not copied by this helper.
 
@@ -228,7 +228,7 @@ Invalid catalog JSON or invalid required top-level fields reject the catalog. An
 ## On-disk layout
 
 ```
-~/.omp/
+~/.mop/
   marketplaces.json              # Registry of added marketplaces
   plugins/
     installed_plugins.json       # User-scoped marketplace plugins (version: 2)
@@ -238,7 +238,7 @@ Invalid catalog JSON or invalid required top-level fields reject the catalog. An
       marketplaces/<name>/       # Cached marketplace clone/catalog
       plugins/<marketplace>___<plugin>___<version>/  # Cached plugin directories
 
-<project>/.omp/
+<project>/.mop/
   plugins/
     installed_plugins.json       # Project-scoped marketplace plugins (version: 2)
     omp-plugins.lock.json         # Project runtime enable/feature state

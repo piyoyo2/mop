@@ -405,40 +405,40 @@ describe("GrepTool internal URL resolution", () => {
 		);
 	});
 
-	it("expands omp:// root to grep embedded documentation files", async () => {
+	it("expands mop:// root to grep embedded documentation files", async () => {
 		const session = createSession();
 		const tool = new GrepTool(session);
 
 		const result = await tool.execute("test-call", {
 			pattern: "Grep file contents with a regex across files",
-			path: "omp://",
+			path: "mop://",
 		});
 
 		const text = getResultText(result);
-		expect(text).toContain("# omp://tools/grep.md");
+		expect(text).toContain("# mop://tools/grep.md");
 		expect(text).toContain("Grep file contents with a regex across files");
 	});
 
-	it("walks an omp:// docs subdirectory and names hits by URL without edit anchors", async () => {
+	it("walks an mop:// docs subdirectory and names hits by URL without edit anchors", async () => {
 		const session = createSession({ hasEditTool: true });
 		const tool = new GrepTool(session);
 
 		const result = await tool.execute("test-call", {
 			pattern: "Read files, directories, archives",
-			path: "omp://tools",
+			path: "mop://tools",
 		});
 
 		const text = getResultText(result);
-		expect(result.details?.files).toContain("omp://tools/read.md");
+		expect(result.details?.files).toContain("mop://tools/read.md");
 		expect(text).toContain("Read files, directories, archives");
 		expect(text).not.toMatch(/omp:\/\/tools\/read\.md#[0-9A-F]{4}/);
 	});
 
-	it("globs omp:// docs by URL pattern", async () => {
-		const text = getResultText(await new GlobTool(createSession()).execute("glob-omp", { path: "omp://tools/*.md" }));
+	it("globs mop:// docs by URL pattern", async () => {
+		const text = getResultText(await new GlobTool(createSession()).execute("glob-omp", { path: "mop://tools/*.md" }));
 
-		expect(text).toContain("omp://tools/read.md");
-		expect(text).toContain("omp://tools/grep.md");
+		expect(text).toContain("mop://tools/read.md");
+		expect(text).toContain("mop://tools/grep.md");
 	});
 
 	it("suppresses hashline anchors when searching immutable artifact:// sources", async () => {

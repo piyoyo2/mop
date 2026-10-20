@@ -354,7 +354,7 @@ describe("MarketplacePluginDetailComponent", () => {
 
 	it("shortens home-relative install paths to ~ before rendering", async () => {
 		const home = os.homedir();
-		const installPath = `${home}/.omp/cache/plugins/sample@mkt`;
+		const installPath = `${home}/.mop/cache/plugins/sample@mkt`;
 		const plugin = marketplace("sample@mkt", { entry: { installPath } });
 		const manager = new PluginManager(process.cwd());
 		spyOn(manager, "getPlugin").mockResolvedValue(undefined);
@@ -366,7 +366,7 @@ describe("MarketplacePluginDetailComponent", () => {
 			onBack: () => {},
 		});
 
-		const text = await renderMarketplaceDetail(component, "~/.omp/cache/plugins/sample@mkt");
+		const text = await renderMarketplaceDetail(component, "~/.mop/cache/plugins/sample@mkt");
 		expect(text).not.toContain(home);
 	});
 });

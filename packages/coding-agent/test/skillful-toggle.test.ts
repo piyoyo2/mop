@@ -58,9 +58,9 @@ describe("skillful setting and /skillful session toggle", () => {
 		originalHome = process.env.HOME;
 		tempHomeDir = fs.mkdtempSync(path.join(os.tmpdir(), "pi-skillful-home-"));
 		process.env.HOME = tempHomeDir;
-		fs.mkdirSync(path.join(tempDir, ".omp", "skills", "test-skill"), { recursive: true });
+		fs.mkdirSync(path.join(tempDir, ".mop", "skills", "test-skill"), { recursive: true });
 		fs.writeFileSync(
-			path.join(tempDir, ".omp", "skills", "test-skill", "SKILL.md"),
+			path.join(tempDir, ".mop", "skills", "test-skill", "SKILL.md"),
 			`---\nname: test-skill\ndescription: A test skill for the skillful toggle.\n---\n# Test Skill\n`,
 		);
 	});
@@ -136,7 +136,7 @@ describe("skillful setting and /skillful session toggle", () => {
 	});
 
 	it("announces URI syntax without catalog rows for hidden-only skills mid-session", async () => {
-		const skillDir = path.join(tempDir, ".omp", "skills", "test-skill");
+		const skillDir = path.join(tempDir, ".mop", "skills", "test-skill");
 		const skillFile = path.join(skillDir, "SKILL.md");
 		await Bun.write(
 			skillFile,

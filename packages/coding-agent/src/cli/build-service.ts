@@ -43,8 +43,8 @@ export type Fetch = (input: string | URL | Request, init?: RequestInit) => Promi
 /** Build service origin used when `PI_BUILD_URL` is unset. */
 export const DEFAULT_BUILD_URL = "https://build.stencil.so";
 
-/** The product omp's builds are published under. */
-const PRODUCT = "omp";
+/** The product mop's builds are published under. */
+const PRODUCT = "mop";
 
 const BUILD_CHECK_TIMEOUT_MS = 30_000;
 

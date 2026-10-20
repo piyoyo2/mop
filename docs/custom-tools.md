@@ -47,11 +47,11 @@ CustomTool.execute(toolCallId, params, onUpdate, ctx, signal)
 `discoverAndLoadCustomTools(configuredPaths, cwd, builtInToolNames, pushPendingAction?, agentDir?)` merges:
 
 1. Capability providers (`toolCapability`), including:
-   - Native OMP config (`<agentDir>/tools`, default `~/.omp/agent/tools`; `.omp/tools`)
+   - Native OMP config (`<agentDir>/tools`, default `~/.mop/agent/tools`; `.mop/tools`)
    - Claude config (`<Claude config dir>/tools`, default `~/.claude/tools`; `.claude/tools`)
    - Codex config (`~/.codex/tools`, `.codex/tools`)
    - OMP package roots and Claude marketplace plugins
-2. Enabled installed plugin manifests (user `~/.omp/plugins` and the active project `.omp/plugins` registry via the plugin loader; project packages shadow same-named user packages)
+2. Enabled installed plugin manifests (user `~/.mop/plugins` and the active project `.mop/plugins` registry via the plugin loader; project packages shadow same-named user packages)
 3. Explicit configured paths passed to the loader
 
 ### Important behavior

@@ -5,7 +5,7 @@
  * - `ls` (default): list available chat models grouped by provider.
  * - `find <substring>`: list models of the selected kind whose provider, id, or name contains the substring.
  * - `refresh`: force an online catalog re-fetch (ignoring the model cache TTL),
- *   then list. This is the supported replacement for `rm -rf ~/.omp/models.db`
+ *   then list. This is the supported replacement for `rm -rf ~/.mop/models.db`
  *   when a provider ships a new model that the 24h cache has not picked up yet.
  *
  * `ls`/`find` use the cache when fresh (`online-if-uncached`); only `refresh`

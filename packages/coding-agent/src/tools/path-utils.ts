@@ -751,7 +751,7 @@ export async function splitDelimitedPathEntry(
 
 /**
  * Split a `;` list that names URLs alongside local paths
- * (`https://x;src/a.ts:1-20`, `omp://;Makefile:1-3`). Engages only when URL
+ * (`https://x;src/a.ts:1-20`, `mop://;Makefile:1-3`). Engages only when URL
  * detection would otherwise claim the whole entry; everything else keeps the
  * normal image/sqlite/archive/literal ordering. Every part must be a URL (per
  * `isUrl`) or an existing literal path without glob characters, so a URL that

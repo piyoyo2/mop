@@ -201,8 +201,8 @@ function parseArgs(argv: string[]): Config {
 	};
 	const home = (value: string): string => value.replace(/^~(?=$|\/)/, os.homedir());
 	return {
-		dbPath: home(get("--db") ?? "~/.omp/agent/history.db"),
-		sessionsDir: home(get("--sessions") ?? "~/.omp/agent/sessions"),
+		dbPath: home(get("--db") ?? "~/.mop/agent/history.db"),
+		sessionsDir: home(get("--sessions") ?? "~/.mop/agent/sessions"),
 		dir: home(get("--dir") ?? path.join(os.tmpdir(), "title-fork")),
 		count: Number(get("--count") ?? 500),
 		resample: argv.includes("--resample"),

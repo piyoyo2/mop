@@ -90,7 +90,7 @@ export function renderFormula(version: string, files: Record<FormulaTarget, Form
 	//
 	// `with_env(HOME: buildpath)` redirects the CLI's `os.homedir()` lookup to
 	// the writable staging dir so `generate_completions_from_executable` does
-	// not touch the real `/Users/<user>/.omp` (denied by Homebrew's sandbox
+	// not touch the real `/Users/<user>/.mop` (denied by Homebrew's sandbox
 	// profile, which would otherwise fail the popen).
 	//
 	// Each `mirror` points at the same file on the GitHub release. Homebrew

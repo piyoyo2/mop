@@ -71,7 +71,7 @@ The published core package contains loader JS, declarations, and metadata but no
 
 For a normal installed package, the platform leaf is probed before the core package's `native/` directory and `process.execPath` directory. Workspace development skips leaf resolution so local artifacts win.
 
-Compiled mode is detected by a populated embedded manifest, `PI_COMPILED`, or a Bun embedded marker in `import.meta.url`. It probes the versioned cache and legacy user-data directory before package/executable locations. `getNativesDir()` first honors `PI_NATIVES_DIR` (trimmed, `~`-expanded, and normalized; empty or relative values are ignored), then uses `$XDG_DATA_HOME/omp/natives` only when `$XDG_DATA_HOME/omp` already exists; otherwise it is `~/.omp/natives`.
+Compiled mode is detected by a populated embedded manifest, `PI_COMPILED`, or a Bun embedded marker in `import.meta.url`. It probes the versioned cache and legacy user-data directory before package/executable locations. `getNativesDir()` first honors `PI_NATIVES_DIR` (trimmed, `~`-expanded, and normalized; empty or relative values are ignored), then uses `$XDG_DATA_HOME/omp/natives` only when `$XDG_DATA_HOME/omp` already exists; otherwise it is `~/.mop/natives`.
 
 A populated manifest references one `<addon>.node.zst` zstd frame per embedded variant. Extraction accepts only basename manifest filenames, decompresses missing or wrong-sized files atomically into `<getNativesDir()>/<version>`, and validates their sizes. On Windows `node_modules` installs, the loader instead stages a leaf/core addon in that versioned directory so a running process does not lock the copy Bun must replace during an update.
 

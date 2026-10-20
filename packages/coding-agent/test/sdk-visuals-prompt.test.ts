@@ -43,17 +43,16 @@ async function promptFor(options: CreateAgentSessionOptions): Promise<string> {
 describe("visuals guidance in the system prompt", () => {
 	it("is offered to the top-level TUI session only, not to RPC or subagent sessions", async () => {
 		const tui = await promptFor({ hasUI: true, tuiTranscript: true });
-		expect(tui).toContain("```mermaid");
-		expect(tui).toContain("```svg");
-		expect(tui).toContain("charts it underneath");
+		// mop's agent answers in prose: the only visual guidance it gets is the
+		// one-form-per-idea rule, not the coding agent's chart and diagram
+		// instructions.
+		expect(tui).toContain("one form per idea");
 
 		// rpc-ui: a UI for dialogs, but replies are read by the client as text.
 		const rpc = await promptFor({ hasUI: true });
 		const subagent = await promptFor({ hasUI: true, tuiTranscript: true, taskDepth: 1 });
 		for (const prompt of [rpc, subagent]) {
-			expect(prompt).not.toContain("```mermaid");
-			expect(prompt).not.toContain("```svg");
-			expect(prompt).not.toContain("charts it underneath");
+			expect(prompt).not.toContain("one form per idea");
 		}
 	});
 });

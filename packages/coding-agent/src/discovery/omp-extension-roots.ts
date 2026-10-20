@@ -18,7 +18,14 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { getAgentDir, isEnoent, logger, MAIN_CONFIG_FILENAMES, tryParseJson } from "@oh-my-pi/pi-utils";
+import {
+	CONFIG_DIR_NAME,
+	getAgentDir,
+	isEnoent,
+	logger,
+	MAIN_CONFIG_FILENAMES,
+	tryParseJson,
+} from "@oh-my-pi/pi-utils";
 import { YAML } from "bun";
 import { readDirEntries, readFile } from "../capability/fs";
 import type { ExtensionRootMode, LoadContext } from "../capability/types";
@@ -159,7 +166,7 @@ interface ScopeDirs {
 
 function scopeDirs(ctx: LoadContext): ScopeDirs {
 	return {
-		project: path.join(ctx.cwd, ".omp"),
+		project: path.join(ctx.cwd, CONFIG_DIR_NAME),
 		user: getAgentDir(),
 	};
 }
@@ -176,7 +183,7 @@ async function readSettingsExtensions(settingsPath: string): Promise<string[] | 
 	return readExtensionsArray(parsed?.extensions);
 }
 
-/** Project native config filename; matches the single `.omp/config.yml` the settings loader reads. */
+/** Project native config filename; matches the single `.mop/config.yml` the settings loader reads. */
 const PROJECT_CONFIG_FILENAMES = ["config.yml"] as const;
 
 interface YamlExtensions {
@@ -267,8 +274,8 @@ async function isDirectory(p: string): Promise<boolean> {
  *    `merge` mode. Its provenance (`configuredLevel`) is carried from
  *    `Settings` (the authority that merges every project provider, incl.
  *    `.claude/settings.json`, and honors overlays/overrides), never re-derived
- *    from a partial `.omp` disk scan; scopeless callers read the persisted
- *    `.omp` config, which supplies its own level.
+ *    from a partial `.mop` disk scan; scopeless callers read the persisted
+ *    `.mop` config, which supplies its own level.
  * 3. Installed npm/link plugins under `<plugins>/node_modules/`, added only in
  *    `merge` mode. Marketplace installs load via the `claude-plugins` provider.
  *
@@ -300,7 +307,7 @@ export async function listOmpExtensionRoots(ctx: LoadContext): Promise<OmpExtens
 		// `Settings` — the authority that merges every project provider (incl.
 		// `.claude/settings.json`) and honors overlays/overrides — so trust the
 		// carried `configuredLevel` verbatim. When no session value is present,
-		// read the persisted `.omp` config on disk, which is the authoritative
+		// read the persisted `.mop` config on disk, which is the authoritative
 		// source (and its own provenance) in that scopeless path.
 		const configuredEntries = ctx.extensionRoots?.configured ?? scopedRoots?.configuredExtensions;
 		const configured =

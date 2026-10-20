@@ -6,7 +6,7 @@ Settings are stored as plain YAML mappings. Every key, its type, default, and en
 
 - For model/provider credentials, `.env` files, and the env-var table that resolves API keys, see [Providers](./providers.md).
 - For custom model definitions in `models.yml`, see [Models](./models.md).
-- For instruction files discovered into the agent context (`AGENTS.md`, `.omp/`, etc.), see [Context files](./context-files.md).
+- For instruction files discovered into the agent context (`AGENTS.md`, `.mop/`, etc.), see [Context files](./context-files.md).
 - For the full catalog of environment variables, see [Environment variables](./environment-variables.md).
 - For prompt words that activate specialized per-turn behavior, see [Magic keywords](./magic-keywords.md).
 
@@ -14,20 +14,20 @@ Settings are stored as plain YAML mappings. Every key, its type, default, and en
 
 | Scope             | Path                                                  | Read behavior                                                                                                                            | Write behavior                                                                                                                                                                   |
 | ----------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Global            | `~/.omp/agent/config.yml` (or existing `config.yaml`) | The main persistent settings file. `config.yml` is the canonical write target; an existing `config.yaml` is loaded and updated in place. | `/settings`, `omp config set`, and `omp config reset` write here.                                                                                                                |
-| Global legacy     | `~/.omp/agent/settings.json`                          | Considered for migration only when neither main YAML filename exists. | Not written; renamed to `settings.json.bak` after a non-empty migrated YAML file is successfully saved. |
-| Project           | `<cwd>/.omp/config.yml` (plus `.omp/settings.json`)   | Loaded when the process working directory has a non-empty `.omp/`.                                                                       | Settings commands do not write arbitrary project keys. With `modelRoleStorage: project`, model-selector role assignments update only `modelRoles` here; edit other keys by hand. |
-| Project legacy    | `<cwd>/.omp/settings.json`                            | Still read; project `config.yml` is merged on top of it.                                                                                 | Not written by settings commands.                                                                                                                                                |
+| Global            | `~/.mop/agent/config.yml` (or existing `config.yaml`) | The main persistent settings file. `config.yml` is the canonical write target; an existing `config.yaml` is loaded and updated in place. | `/settings`, `omp config set`, and `omp config reset` write here.                                                                                                                |
+| Global legacy     | `~/.mop/agent/settings.json`                          | Considered for migration only when neither main YAML filename exists. | Not written; renamed to `settings.json.bak` after a non-empty migrated YAML file is successfully saved. |
+| Project           | `<cwd>/.mop/config.yml` (plus `.mop/settings.json`)   | Loaded when the process working directory has a non-empty `.mop/`.                                                                       | Settings commands do not write arbitrary project keys. With `modelRoleStorage: project`, model-selector role assignments update only `modelRoles` here; edit other keys by hand. |
+| Project legacy    | `<cwd>/.mop/settings.json`                            | Still read; project `config.yml` is merged on top of it.                                                                                 | Not written by settings commands.                                                                                                                                                |
 | CLI overlay       | Any file passed with `--config <file>`                | Loaded after global and project settings, for that one process. Repeatable.                                                              | Never persisted.                                                                                                                                                                 |
 | Runtime overrides | In-memory only                                        | Set by settings overrides such as `--approval-mode`, role flags, and feature env vars. | Never persisted. |
 
-The global paths above describe the default profile. `omp --profile work` selects `~/.omp/profiles/work/agent` instead, isolating settings, auth, sessions, and caches. `OMP_PROFILE` also selects a profile; `PI_PROFILE` is its compatibility fallback only when `OMP_PROFILE` is absent. An explicit `--profile` wins over both, and `--profile default` selects the default profile.
+The global paths above describe the default profile. `omp --profile work` selects `~/.mop/profiles/work/agent` instead, isolating settings, auth, sessions, and caches. `OMP_PROFILE` also selects a profile; `PI_PROFILE` is its compatibility fallback only when `OMP_PROFILE` is absent. An explicit `--profile` wins over both, and `--profile default` selects the default profile.
 
 `PI_CODING_AGENT_DIR` relocates the default profile's agent directory, including `config.yml` and its agent data. Named profiles derive their own agent directory and ignore this override. Use `omp config path` (or `omp --profile work config path`) to print the active settings directory.
 
 On Linux and macOS, configured `XDG_DATA_HOME`, `XDG_STATE_HOME`, and `XDG_CACHE_HOME` can redirect data/state/cache when the corresponding `omp` directories exist. Named profiles require the corresponding `omp/profiles/<name>` directory. This does not move `config.yml`: it stays under the active agent directory, while `agent.db` and other categorized data may live elsewhere. `omp config init-xdg` creates the base directories but does not migrate files or set environment variables.
 
-Native project settings are intentionally scoped to the process working directory's `.omp/` folder — settings discovery does **not** walk ancestor directories looking for the nearest `.omp/`. Other discovery providers (Claude, Codex, Gemini, Cursor, OpenCode) can also contribute project-level settings from their own files; those are read-only from `omp` settings commands and can be turned off by provider id (see [Provider and source disabling](#provider-and-source-disabling)).
+Native project settings are intentionally scoped to the process working directory's `.mop/` folder — settings discovery does **not** walk ancestor directories looking for the nearest `.mop/`. Other discovery providers (Claude, Codex, Gemini, Cursor, OpenCode) can also contribute project-level settings from their own files; those are read-only from `omp` settings commands and can be turned off by provider id (see [Provider and source disabling](#provider-and-source-disabling)).
 
 ## Config file formats
 
@@ -93,7 +93,7 @@ Setting-specific normalization and validation still apply after parsing. For exa
 
 ### Where writes go
 
-`omp config set`, `omp config reset`, `/settings`, and persistent runtime settings changes write the global main YAML file under the active agent directory. Runtime-only overrides are not saved. Settings commands do not write arbitrary keys to `<cwd>/.omp/config.yml`. Model-role assignment or clearing with `modelRoleStorage: project` updates only the affected roles there; missing project roles fall back to global roles. To create another project-local override, edit the project file directly (see [Project-local config](#project-local-config)).
+`omp config set`, `omp config reset`, `/settings`, and persistent runtime settings changes write the global main YAML file under the active agent directory. Runtime-only overrides are not saved. Settings commands do not write arbitrary keys to `<cwd>/.mop/config.yml`. Model-role assignment or clearing with `modelRoleStorage: project` updates only the affected roles there; missing project roles fall back to global roles. To create another project-local override, edit the project file directly (see [Project-local config](#project-local-config)).
 
 Saves are debounced and re-read the file under a lock. Disjoint external edits are preserved. If an external writer changed the same global setting or model role after a local change was staged, the stale local change is skipped with a warning rather than overwriting the newer file value.
 
@@ -122,7 +122,7 @@ From highest to lowest:
 1. **Setting env var** — an environment variable declared on the setting's definition (for example `PI_PY` for `eval.py`, `OMP_AUTH_BROKER_URL` for `auth.broker.url`). Parsed by the setting's type unless it declares a custom parser; unparseable text (such as `PI_EDIT_VARIANT=auto`) counts as unset. Booleans follow the `parseFlag` convention: empty counts as unset, `1`/`y`/`true`/`yes`/`on` (all-lowercase or all-uppercase) mean true, and any other value means false. A few are declared as fallbacks instead (`SEARXNG_*`, `MNEMOPI_EMBEDDING_MODEL`): they only replace the built-in default, so any configured layer wins over them — except a configured `null`, which counts as unset. `SEARXNG_ENDPOINT`, `SEARXNG_TOKEN`, and `MNEMOPI_EMBEDDING_MODEL` also apply when the setting is a blank string.
 2. **Runtime overrides** — settings applied in memory for the current process, including `--smol`, `--slow`, `--plan`, `--approval-mode`, `--auto-approve`/`--yolo`, `--hide-thinking`, `--advisor`, `--external-thinking`, and protocol-mode defaults. Never persisted. Other one-shot options such as `--model`, `--thinking`, `--service-tier`, `--no-lsp`, `--no-pty`, and `--api-key` affect session/model/transport options rather than all being registry settings. Protocol-mode defaults (RPC/ACP) hold only while nothing else configures the setting: a settings write or reset of it, a `config.yml` or project edit picked up by a reload, or an ACP session's own project config replaces them.
 3. **CLI config overlays** — each `--config <file>`; later overlay files override earlier ones.
-4. **Project settings** — `<cwd>/.omp/settings.json` then `<cwd>/.omp/config.yml` (and contributions from other discovery providers at project level).
+4. **Project settings** — `<cwd>/.mop/settings.json` then `<cwd>/.mop/config.yml` (and contributions from other discovery providers at project level).
 5. **Global settings** — the active agent/profile directory's `config.yml` (or existing `config.yaml`).
 6. **Built-in defaults** — from the setting definition.
 
@@ -233,7 +233,7 @@ The named replacement tool must be available in the current session or the inter
 ### Worked example: global vs. project
 
 ```yaml
-# ~/.omp/agent/config.yml
+# ~/.mop/agent/config.yml
 tools:
   approvalMode: write
   approval:
@@ -244,7 +244,7 @@ disabledProviders:
   - openai
   - google
 
-# <repo>/.omp/config.yml
+# <repo>/.mop/config.yml
 tools:
   approval:
     bash: allow
@@ -268,10 +268,10 @@ Array replacement is the most common surprise: the project's `disabledProviders`
 
 ## Project-local config
 
-Create `<repo>/.omp/config.yml` when a repository needs its own settings:
+Create `<repo>/.mop/config.yml` when a repository needs its own settings:
 
 ```yaml
-# <repo>/.omp/config.yml
+# <repo>/.mop/config.yml
 modelRoles:
   default: anthropic/claude-sonnet-4-5
   smol: openai/gpt-4.1-mini
@@ -357,19 +357,19 @@ Most provider-control use cases list model provider ids. Disabling the `claude` 
 Because arrays replace rather than append, a project that sets `disabledProviders` must list the complete desired set:
 
 ```yaml
-# ~/.omp/agent/config.yml
+# ~/.mop/agent/config.yml
 disabledProviders:
   - anthropic
   - openai
 
-# <repo>/.omp/config.yml — inside this repo ONLY groq is disabled
+# <repo>/.mop/config.yml — inside this repo ONLY groq is disabled
 disabledProviders:
   - groq
 ```
 
 The default is an empty array (nothing disabled). For the two subsystems' provider ids and ordering, see [Providers](./providers.md) and [Context files](./context-files.md).
 
-Native project `modelRoles` are also read directly from `.omp/config.yml`; disabling the `native` discovery provider does not suppress that model-role layer.
+Native project `modelRoles` are also read directly from `.mop/config.yml`; disabling the `native` discovery provider does not suppress that model-role layer.
 
 ## Settings catalog
 
@@ -445,7 +445,7 @@ Existing configs are migrated automatically when loaded. Retired backend selecto
 | Key                    | Type    | Default                     | Notes                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------- | ------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `modelRoles`           | record  | `{}`                        | Map of role name to primary selector or ordered primary candidates. Custom chat roles can be introduced through assignments, `modelTags`, or `cycleOrder`. `--smol`/`--slow`/`--plan` and their `PI_*_MODEL` vars override those roles for a run; `--model` selects the active chat model.                                                                                                                                                                                       |
-| `modelRoleStorage`     | enum    | `global`                    | `global` saves model-selector role assignments in the active global/profile config; `project` saves only those role assignments in `<cwd>/.omp/config.yml`. Missing project roles fall back to global roles.                                                                                                                                                                                                     |
+| `modelRoleStorage`     | enum    | `global`                    | `global` saves model-selector role assignments in the active global/profile config; `project` saves only those role assignments in `<cwd>/.mop/config.yml`. Missing project roles fall back to global roles.                                                                                                                                                                                                     |
 | `modelPresets`         | record  | `{}`                        | Named model presets, each `{ modelRoles, defaultThinkingLevel }`. Written by `/modelpreset save` and the `/models` Roles view (`s`); applied by `/modelpreset switch`. Saves write only the named entry to the global config; project-defined presets are listed and applied but never copied globally. See [Model presets](./models.md#model-presets). |
 | `modelTags`            | record  | `{}`                        | Custom role/tag metadata; can introduce additional chat roles.                                                                                                                                                                                                                                                                                                                                                   |
 | `modelProviderOrder`   | array   | `[]`                        | Preferred provider order when a model id is ambiguous.                                                                                                                                                                                                                                                                                                                                                           |
@@ -1064,8 +1064,8 @@ Selected migrations applied whenever raw settings are loaded (global, project, o
 
 ### A project setting is not taking effect
 
-- Start `omp` from the directory that contains `.omp/config.yml`. Settings discovery only checks the current working directory's `.omp/`, not ancestor directories.
-- Ensure `.omp/` is non-empty; empty config directories are ignored.
+- Start `omp` from the directory that contains `.mop/config.yml`. Settings discovery only checks the current working directory's `.mop/`, not ancestor directories.
+- Ensure `.mop/` is non-empty; empty config directories are ignored.
 - Confirm the file is valid YAML and its top level is a mapping.
 - Run `omp config get <key>` from that directory to see the effective value.
 - Remember that `--config` overlays and runtime flags override project config.
@@ -1083,7 +1083,7 @@ Arrays replace; they do not append. If a project sets `disabledProviders`, `enab
 
 ### `omp config set` changed the wrong file
 
-`omp config set` and `omp config reset` write the main global YAML file (`config.yml`, or the existing compatible `config.yaml`) under the active agent/profile directory. Run `omp config path` to print that directory and check `--profile`, `OMP_PROFILE`, and `PI_CODING_AGENT_DIR`. For project-local keys, edit `<repo>/.omp/config.yml` directly.
+`omp config set` and `omp config reset` write the main global YAML file (`config.yml`, or the existing compatible `config.yaml`) under the active agent/profile directory. Run `omp config path` to print that directory and check `--profile`, `OMP_PROFILE`, and `PI_CODING_AGENT_DIR`. For project-local keys, edit `<repo>/.mop/config.yml` directly.
 
 ### A `--config` overlay fails at startup
 

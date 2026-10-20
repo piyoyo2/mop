@@ -7,7 +7,7 @@ This document describes the **current hook subsystem code** in `packages/coding-
 The default CLI runtime initializes the **extension runner** path. In current startup flow:
 
 - `--hook` is treated as an alias for `--extension` (CLI paths are merged into `additionalExtensionPaths`)
-- JS/TS hook factories discovered through `hookCapability` (for example `.omp/hooks/pre/*.ts`) are loaded as extension modules so their `pi.on(...)` handlers bind to the runtime event bus
+- JS/TS hook factories discovered through `hookCapability` (for example `.mop/hooks/pre/*.ts`) are loaded as extension modules so their `pi.on(...)` handlers bind to the runtime event bus
 - tools are wrapped by `ExtensionToolWrapper`, not `HookToolWrapper`
 - context transforms and lifecycle emissions go through `ExtensionRunner`
 
@@ -81,10 +81,10 @@ sources are unaffected by that user-level gate.
 
 The native provider scans only two subdirectories per config root — a factory placed **directly** in `hooks/` is not discovered:
 
-- Project: `<cwd>/.omp/hooks/pre/*.{ts,js}` and `<cwd>/.omp/hooks/post/*.{ts,js}`
-- User: `<agentDir>/hooks/pre/*.{ts,js}` and `<agentDir>/hooks/post/*.{ts,js}` (default `~/.omp/agent/hooks/...`; profile- and `PI_CODING_AGENT_DIR`-aware)
+- Project: `<cwd>/.mop/hooks/pre/*.{ts,js}` and `<cwd>/.mop/hooks/post/*.{ts,js}`
+- User: `<agentDir>/hooks/pre/*.{ts,js}` and `<agentDir>/hooks/post/*.{ts,js}` (default `~/.mop/agent/hooks/...`; profile- and `PI_CODING_AGENT_DIR`-aware)
 
-A factory directly under `<cwd>/.omp/hooks/` is not found by ambient native
+A factory directly under `<cwd>/.mop/hooks/` is not found by ambient native
 discovery; put it in `pre/` or `post/`, or supply its path explicitly. Dot-prefixed
 entries and non-files are skipped. The directory and basename supply capability
 metadata/deduplication keys, not automatic event registration: the factory must

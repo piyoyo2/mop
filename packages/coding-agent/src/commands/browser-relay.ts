@@ -24,7 +24,7 @@ export default class BrowserRelay extends Command {
 		port: Flags.integer({ char: "p", description: "Port to listen on", default: DEFAULT_RELAY_PORT }),
 		token: Flags.string({ description: "Require the extension to present this token" }),
 		dir: Flags.string({
-			description: "Extension install directory (install; default ~/.omp/browser-relay/extension)",
+			description: "Extension install directory (install; default ~/.mop/browser-relay/extension)",
 		}),
 		"no-group": Flags.boolean({
 			description: "Don't gather controllable tabs into an 'omp' tab group",

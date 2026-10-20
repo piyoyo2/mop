@@ -15,10 +15,10 @@ Generated IDs are lowercase UUID v4 values. Existing persisted values are trimme
 
 ## Storage
 
-- Path: `<base-config-root>/install-id` — i.e. `~/.omp/install-id` by default, respecting `PI_CONFIG_DIR`. Resolved against the base config root (`getBaseConfigRoot()`) regardless of the active profile or XDG data/state/cache routing, so every profile using that base root shares one install ID.
+- Path: `<base-config-root>/install-id` — i.e. `~/.mop/install-id` by default, respecting `PI_CONFIG_DIR`. Resolved against the base config root (`getBaseConfigRoot()`) regardless of the active profile or XDG data/state/cache routing, so every profile using that base root shares one install ID.
 - Format: a single UUID line (trailing `\n`).
 - Permissions: file is created with mode `0o600`.
-- Lifecycle: independent of `~/.omp/agent/`. Wiping agent state (sessions, settings, DB) does NOT regenerate the install ID; only deleting the `install-id` file itself does.
+- Lifecycle: independent of `~/.mop/agent/`. Wiping agent state (sessions, settings, DB) does NOT regenerate the install ID; only deleting the `install-id` file itself does.
 
 ## Generation and lifecycle
 

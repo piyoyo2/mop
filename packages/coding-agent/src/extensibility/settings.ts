@@ -80,6 +80,18 @@ export const cfgSkillsIncludeSkills = register({
 	default: EMPTY_STRING_ARRAY,
 });
 
+export const cfgSkillsExcludeProviders = register({
+	id: "skills.excludeProviders",
+	type: "array",
+	default: EMPTY_STRING_ARRAY,
+	ui: {
+		tab: "tasks",
+		group: "Commands & Skills",
+		label: "Excluded Skill Providers",
+		description: 'Skill providers to skip entirely (e.g. "mop-bundled" to hide mop\'s own card-authoring skills)',
+	},
+});
+
 /** Skill discovery options (`skills.*` except the `omp skill` registry URL). */
 export const cfgSkills = combine({
 	enabled: cfgSkillsEnabled,
@@ -94,6 +106,7 @@ export const cfgSkills = combine({
 	customDirectories: cfgSkillsCustomDirectories,
 	ignoredSkills: cfgSkillsIgnoredSkills,
 	includeSkills: cfgSkillsIncludeSkills,
+	excludeProviders: cfgSkillsExcludeProviders,
 });
 
 /** Skill discovery options ({@link cfgSkills}); omitted fields fall back to the setting defaults. */

@@ -61,13 +61,13 @@ describe("run status OSC 7501 reporting", () => {
 		setRunStatus({ state: "error", msg: " \n " });
 
 		expect(writes).toEqual([
-			report("state=working:app=omp"),
+			report("state=working:app=mop"),
 			report(
-				`state=blocked:kind=question:app=omp:msg=${Buffer.from("Which branch? main or dev?").toString("base64")}`,
+				`state=blocked:kind=question:app=mop:msg=${Buffer.from("Which branch? main or dev?").toString("base64")}`,
 			),
-			report("state=done:app=omp"),
-			report(`state=error:app=omp:msg=${Buffer.from("boom").toString("base64")}`),
-			report("state=error:app=omp"),
+			report("state=done:app=mop"),
+			report(`state=error:app=mop:msg=${Buffer.from("boom").toString("base64")}`),
+			report("state=error:app=mop"),
 		]);
 	});
 
@@ -93,7 +93,7 @@ describe("run status OSC 7501 reporting", () => {
 		writes.length = 0;
 		initProgramStatus();
 		setRunStatus({ state: "idle" });
-		expect(writes).toEqual([report("state=idle:app=omp")]);
+		expect(writes).toEqual([report("state=idle:app=mop")]);
 	});
 
 	it("clears the record when turned off and reports the current status when turned back on", () => {
@@ -104,7 +104,7 @@ describe("run status OSC 7501 reporting", () => {
 		setRunStatus({ state: "blocked", kind: "permission" });
 		setProgramStatusEnabled(true);
 
-		expect(writes).toEqual([CLEAR, report("state=blocked:kind=permission:app=omp")]);
+		expect(writes).toEqual([CLEAR, report("state=blocked:kind=permission:app=mop")]);
 	});
 
 	it("re-sends a working record after a suspend but never repeats a done result", () => {
@@ -114,9 +114,9 @@ describe("run status OSC 7501 reporting", () => {
 		resendProgramStatus();
 
 		expect(writes).toEqual([
-			report("state=working:app=omp"),
-			report("state=working:app=omp"),
-			report("state=done:app=omp"),
+			report("state=working:app=mop"),
+			report("state=working:app=mop"),
+			report("state=done:app=mop"),
 		]);
 	});
 });

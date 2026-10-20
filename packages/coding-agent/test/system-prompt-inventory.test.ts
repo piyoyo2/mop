@@ -513,8 +513,9 @@ describe("system prompt tool inventory", () => {
 			workspaceTree: { ...EMPTY_TREE, rootPath: tempDir },
 		});
 		const text = systemPrompt.join("\n\n");
-		expect(text).toContain("MUST use `xd://lsp` for definitions");
-		expect(text).toContain("MUST run `xd://lsp` references first");
+		// An xd://-only tool is offered through the device block, never as a
+		// bare tool the agent would try to call directly.
+		expect(text).toContain("# xd:// Tool Devices");
 		expect(text).not.toContain("`lsp`");
 	});
 
@@ -531,7 +532,7 @@ describe("system prompt tool inventory", () => {
 				eagerTasks,
 			});
 			const count = (needle: string) => systemPrompt[0].split(needle).length - 1;
-			return [count("Map unknown code via `task`"), count("Inline first.")];
+			return [count("Map unknown material via `task`"), count("Inline first.")];
 		};
 		expect(await renderDelegation("eager", false)).toEqual([1, 0]);
 		expect(await renderDelegation("eager", true)).toEqual([1, 0]);
@@ -555,9 +556,8 @@ describe("system prompt tool inventory", () => {
 		});
 		expect(systemPrompt[1]).toBe("COMPUTER-GUIDANCE");
 		expect(systemPrompt.filter(block => block.includes("COMPUTER-GUIDANCE"))).toHaveLength(1);
-		// Prelude names still drive the verification bullets.
-		expect(systemPrompt[0]).toContain("Native desktop: JS/Python eval `computer` helpers");
-		expect(systemPrompt[0]).not.toContain("No runtime for changed surface");
+		// The guidance ships as its own block, never folded into the main prompt.
+		expect(systemPrompt[0]).not.toContain("COMPUTER-GUIDANCE");
 	});
 
 	it("renders the functions namespace (not a name list) when tools are not native", async () => {
@@ -972,7 +972,7 @@ describe("system prompt tool inventory", () => {
 		expect(text).not.toContain("`skill://<name>`");
 	});
 
-	it("omits the read-only scout delegation gate when scout is unavailable", async () => {
+	it("omits the read-only delegation gate when no read-only subagent is spawnable", async () => {
 		const opts = { toolNames: ["read", "bash", "task"], tools: TOOLS };
 		const withScout = (
 			await buildSystemPrompt({
@@ -997,8 +997,8 @@ describe("system prompt tool inventory", () => {
 			})
 		).systemPrompt.join("\n\n");
 
-		expect(withScout).toContain("read-only scout");
-		expect(withoutScout).not.toContain("read-only scout");
+		expect(withScout).toContain("one read-only subagent while working allowed");
+		expect(withoutScout).not.toContain("one read-only subagent while working allowed");
 	});
 
 	it("omits todo workflow guidance when the todo tool is absent", async () => {

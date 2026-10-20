@@ -55,7 +55,7 @@ export async function resolveCompressTargets(patterns: readonly string[], cwd: s
 	const found = new Set<string>();
 	for (const pattern of patterns) {
 		if (/[*?[\]{}]/.test(pattern)) {
-			// `dot: true` — prompt corpora live under dot directories such as `.omp/commands`.
+			// `dot: true` — prompt corpora live under dot directories such as `.mop/commands`.
 			const matches = new Bun.Glob(pattern).scanSync({ cwd, absolute: true, onlyFiles: true, dot: true });
 			let matched = 0;
 			for (const match of matches) {

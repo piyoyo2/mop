@@ -303,6 +303,9 @@ export async function loadSkills(options: LoadSkillsOptions = {}): Promise<LoadS
 		disabledExtensions = [],
 		extensionRoots,
 	} = options;
+	// `skills.excludeProviders` (and the call-site override of the same name)
+	// narrows the source set: listed providers are skipped entirely.
+	const excludeProviders = options.excludeProviders ?? [];
 
 	// Early return if skills are disabled
 	if (!enabled) {
@@ -336,6 +339,7 @@ export async function loadSkills(options: LoadSkillsOptions = {}): Promise<LoadS
 	const result = await loadCapability<CapabilitySkill>(skillCapability.id, {
 		cwd,
 		disabledExtensions,
+		excludeProviders,
 		extensionRoots,
 	});
 

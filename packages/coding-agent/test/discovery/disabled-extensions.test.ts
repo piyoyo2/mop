@@ -43,10 +43,10 @@ describe("disabledExtensions runtime filtering", () => {
 		process.env.HOME = tempHomeDir;
 		process.env.USERPROFILE = tempHomeDir;
 		vi.spyOn(os, "homedir").mockReturnValue(tempHomeDir);
-		setAgentDir(path.join(tempHomeDir, ".omp", "agent"));
+		setAgentDir(path.join(tempHomeDir, ".mop", "agent"));
 		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-disabled-ext-"));
-		await fs.mkdir(path.join(tempDir, ".omp"), { recursive: true });
-		await fs.writeFile(path.join(tempDir, ".omp", "AGENTS.md"), "# project instructions\n");
+		await fs.mkdir(path.join(tempDir, ".mop"), { recursive: true });
+		await fs.writeFile(path.join(tempDir, ".mop", "AGENTS.md"), "# project instructions\n");
 
 		const settings = await Settings.init({
 			inMemory: true,
@@ -89,7 +89,7 @@ describe("disabledExtensions runtime filtering", () => {
 	});
 
 	test("keeps the runtime context winner active in the dashboard when its competitor is disabled", async () => {
-		await fs.rm(path.join(tempDir, ".omp", "AGENTS.md"));
+		await fs.rm(path.join(tempDir, ".mop", "AGENTS.md"));
 		await fs.writeFile(path.join(tempDir, "AGENTS.md"), "# active project instructions\n");
 		await fs.mkdir(path.join(tempDir, ".gemini"), { recursive: true });
 		await fs.writeFile(path.join(tempDir, ".gemini", "GEMINI.md"), "# disabled project instructions\n");
@@ -109,7 +109,7 @@ describe("disabledExtensions runtime filtering", () => {
 	});
 
 	test("deduplicates against the caller's session-local disabled list, not global settings", async () => {
-		await fs.rm(path.join(tempDir, ".omp", "AGENTS.md"));
+		await fs.rm(path.join(tempDir, ".mop", "AGENTS.md"));
 		await fs.writeFile(path.join(tempDir, "AGENTS.md"), "# active project instructions\n");
 		await fs.mkdir(path.join(tempDir, ".gemini"), { recursive: true });
 		await fs.writeFile(path.join(tempDir, ".gemini", "GEMINI.md"), "# session-disabled project instructions\n");
@@ -127,7 +127,7 @@ describe("disabledExtensions runtime filtering", () => {
 	});
 
 	test("deduplicates against an empty snapshot when the caller omits disabled IDs", async () => {
-		await fs.rm(path.join(tempDir, ".omp", "AGENTS.md"));
+		await fs.rm(path.join(tempDir, ".mop", "AGENTS.md"));
 		await fs.writeFile(path.join(tempDir, "AGENTS.md"), "# lower-priority project instructions\n");
 		await fs.mkdir(path.join(tempDir, ".gemini"), { recursive: true });
 		await fs.writeFile(path.join(tempDir, ".gemini", "GEMINI.md"), "# higher-priority project instructions\n");
@@ -143,7 +143,7 @@ describe("disabledExtensions runtime filtering", () => {
 	});
 
 	test("marks a disabled lower-priority row shadowed when an enabled higher-priority item owns the key", async () => {
-		// Enabled builtin .omp/AGENTS.md (priority 100) already exists at project
+		// Enabled builtin .mop/AGENTS.md (priority 100) already exists at project
 		// depth 0 from beforeEach; add a lower-priority .gemini/GEMINI.md at the
 		// same depth and disable it.
 		await fs.mkdir(path.join(tempDir, ".gemini"), { recursive: true });
@@ -153,7 +153,7 @@ describe("disabledExtensions runtime filtering", () => {
 		initializeWithSettings(Settings.isolated({ disabledExtensions: disabledIds }));
 
 		const dashboard = await loadAllExtensions(tempDir, disabledIds);
-		const agents = dashboard.find(extension => extension.path === path.join(tempDir, ".omp", "AGENTS.md"));
+		const agents = dashboard.find(extension => extension.path === path.join(tempDir, ".mop", "AGENTS.md"));
 		const gemini = dashboard.find(extension => extension.path === path.join(tempDir, ".gemini", "GEMINI.md"));
 
 		expect(agents?.state).toBe("active");

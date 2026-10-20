@@ -463,7 +463,7 @@ describe("UsageDashboardComponent", () => {
 	});
 	it("sanitizes control sequences, collapses multiline errors, and shortens paths", async () => {
 		const home = os.homedir();
-		const rawError = `subprocess crashed at ${home}/.omp/stats.db:\n\tfailed to open\x1b[2J\r\nline 2\x1b[31m...`;
+		const rawError = `subprocess crashed at ${home}/.mop/stats.db:\n\tfailed to open\x1b[2J\r\nline 2\x1b[31m...`;
 		const { promise: rendered, resolve: markRendered } = Promise.withResolvers<void>();
 		const component = new UsageDashboardComponent({
 			reports: [],
@@ -481,9 +481,9 @@ describe("UsageDashboardComponent", () => {
 		expect(contentLine).not.toContain("\n");
 		expect(contentLine).not.toContain("\t");
 		expect(contentLine).not.toContain(home);
-		expect(contentLine).toContain("~/.omp/stats.db");
+		expect(contentLine).toContain("~/.mop/stats.db");
 		expect(contentLine).toContain(
-			"Usage history unavailable (subprocess crashed at ~/.omp/stats.db: failed to open line 2).",
+			"Usage history unavailable (subprocess crashed at ~/.mop/stats.db: failed to open line 2).",
 		);
 	});
 });
@@ -496,7 +496,7 @@ describe("formatActivityErrorDetail", () => {
 
 	it("shortens home directory paths to tilde and removes trailing dots", () => {
 		const home = "/Users/testuser";
-		const input = `Error: failed to open ${home}/.omp/stats.db...`;
-		expect(formatActivityErrorDetail(input, home)).toBe("Error: failed to open ~/.omp/stats.db");
+		const input = `Error: failed to open ${home}/.mop/stats.db...`;
+		expect(formatActivityErrorDetail(input, home)).toBe("Error: failed to open ~/.mop/stats.db");
 	});
 });

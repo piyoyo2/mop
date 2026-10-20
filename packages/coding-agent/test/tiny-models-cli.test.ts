@@ -87,7 +87,7 @@ describe("tiny-models download model resolution", () => {
 			"Error: Failed to load ONNX Runtime CUDA execution provider",
 			"ONNX Runtime CUDA diagnostics:",
 			"  PI_TINY_DEVICE=cuda requested CUDAExecutionProvider",
-			"  side runtime: /home/user/.omp/cache/tiny-title-runtime/transformers-test/node_modules",
+			"  side runtime: /home/user/.mop/cache/tiny-title-runtime/transformers-test/node_modules",
 			"  cause: libcudnn.so.9: cannot open shared object file",
 		].join("\n");
 		Object.defineProperty(process.stdout, "isTTY", { configurable: true, value: false });

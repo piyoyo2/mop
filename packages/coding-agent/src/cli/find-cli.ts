@@ -84,7 +84,7 @@ export async function runFindCommand(cmd: FindCommandArgs): Promise<void> {
 	}
 	const log = cmd.quiet ? () => {} : (message: string) => console.error(chalk.dim(message));
 	const cwd = process.cwd();
-	// Internal URLs (`omp://`, `local://`, …) are searched in place; `find` only reads.
+	// Internal URLs (`mop://`, `local://`, …) are searched in place; `find` only reads.
 	const filesystem = new InternalUrlFilesystem({ context: { cwd }, tier: "read" });
 	let root: SearchRoot;
 	try {

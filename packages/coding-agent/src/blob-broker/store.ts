@@ -5,7 +5,7 @@
  *
  * Persistence keeps two promises at once:
  * - **Resume-stable links.** The key→token index survives restarts in
- *   `~/.omp/agent/blobs/urls-index-<project>.json`, and eager bytes live in
+ *   `~/.mop/agent/blobs/urls-index-<project>.json`, and eager bytes live in
  *   the same content-addressed session blob store conversation images are
  *   already externalized to — so re-decorating a resumed conversation yields
  *   byte-identical URLs without copying anything.

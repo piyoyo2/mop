@@ -253,11 +253,11 @@ function pathSegments(filePath: string): string[] {
 	return normalized.split(flavor.sep).filter(part => part.length > 0 && part !== ".");
 }
 
-/** Project-local items only. Uses the directory that contains `.omp`, when present. */
+/** Project-local items only. Uses the directory that contains `.mop`, when present. */
 export function projectListHint(ext: Extension): string | undefined {
 	if (ext.source.level !== "project") return undefined;
 	const parts = pathSegments(ext.path);
-	const ompIndex = parts.lastIndexOf(".omp");
+	const ompIndex = parts.lastIndexOf(".mop");
 	if (ompIndex <= 0) return undefined;
 	const parent = parts[ompIndex - 1];
 	return parent && parent !== "." ? parent : undefined;

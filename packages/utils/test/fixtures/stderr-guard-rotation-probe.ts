@@ -18,7 +18,7 @@ const thirdDay = process.argv[4];
 
 const sink = new RotatingFileSink({
 	directory,
-	filenamePrefix: "omp",
+	filenamePrefix: "mop",
 	filenameSuffix: String(process.pid),
 	maxBytes: 10 * 1024 * 1024,
 	maxFiles: 5,

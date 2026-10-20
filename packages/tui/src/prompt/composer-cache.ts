@@ -1,6 +1,6 @@
 /**
  * Speculative composer state for the next first frame, kept in one SQLite store
- * (`~/.omp/agent/cache/composer.db`).
+ * (`~/.mop/agent/cache/composer.db`).
  *
  * Each row is one JSON payload keyed by project (the resolved cwd) and kind.
  * Settings-derived kinds (theme/composer preferences, status-bar inputs) are

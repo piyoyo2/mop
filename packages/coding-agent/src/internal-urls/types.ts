@@ -417,7 +417,7 @@ export interface ProtocolHandler {
 	 */
 	locateSync?(url: InternalUrl, context?: ResolveContext): string | undefined;
 	/**
-	 * Expand a virtual container URL (e.g. `omp://`) into its searchable
+	 * Expand a virtual container URL (e.g. `mop://`) into its searchable
 	 * leaf documents for `grep`/`find`. Leaf `url`s must round-trip through `resolve`.
 	 */
 	enumerate?(url: InternalUrl, context?: ResolveContext): Promise<Array<{ url: string; content: string }>>;

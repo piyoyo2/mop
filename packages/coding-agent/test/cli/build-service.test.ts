@@ -8,7 +8,7 @@ import {
 } from "@oh-my-pi/pi-coding-agent/cli/build-service";
 import { VERSION } from "@oh-my-pi/pi-utils";
 
-const fileName = "omp-darwin-arm64";
+const fileName = "mop-darwin-arm64";
 const sha = (text: string) => Bun.SHA256.hash(text, "hex");
 
 /** A well-formed `latest` answer, with `overrides` merged over the top level. */
@@ -16,7 +16,7 @@ function answer(overrides: Record<string, unknown> = {}): Record<string, unknown
 	return {
 		build: { id: "20261011-120000-abcdef0", version: "18.8.9", channel: "stable" },
 		file: { name: fileName, platform: "macos", arch: "arm64", kind: "binary", size: 205_765_664, sha256: sha("new") },
-		download: "https://r2.test/omp/18.8.9/omp-darwin-arm64?X-Amz-Signature=x",
+		download: "https://r2.test/omp/18.8.9/mop-darwin-arm64?X-Amz-Signature=x",
 		patch: {
 			format: "file",
 			from: "20261001-120000-1234567",
@@ -36,7 +36,7 @@ describe("build service answers", () => {
 		expect(parsed).toEqual({
 			version: "18.8.9",
 			file: { name: fileName, size: 205_765_664, sha256: sha("new") },
-			download: "https://r2.test/omp/18.8.9/omp-darwin-arm64?X-Amz-Signature=x",
+			download: "https://r2.test/omp/18.8.9/mop-darwin-arm64?X-Amz-Signature=x",
 			patch: {
 				fromSha256: sha("old"),
 				fromVersion: "18.8.8",
@@ -55,7 +55,7 @@ describe("build service answers", () => {
 		expect(() => parseBuildAnswer(answer(file({ sha256: "abc" })), fileName)).toThrow("invalid sha256");
 		expect(() => parseBuildAnswer(answer(file({ size: 0 })), fileName)).toThrow("invalid size");
 		expect(() => parseBuildAnswer(answer(file({ name: "omp-darwin-x64" })), fileName)).toThrow(
-			"omp-darwin-x64 is not omp-darwin-arm64",
+			"omp-darwin-x64 is not mop-darwin-arm64",
 		);
 		expect(() => parseBuildAnswer(answer({ download: "http://r2.test/omp" }), fileName)).toThrow("no HTTPS download");
 		expect(() => parseBuildAnswer(answer({ build: { version: "latest" } }), fileName)).toThrow("no valid version");
@@ -78,19 +78,19 @@ describe("build service targets", () => {
 	it("maps platform, architecture, and libc to the service target and release file name", () => {
 		expect(resolveBuildHost("darwin", "arm64", false)).toEqual({
 			target: "macos-arm64",
-			fileName: "omp-darwin-arm64",
+			fileName: "mop-darwin-arm64",
 		});
 		expect(resolveBuildHost("linux", "x64", true)).toEqual({
 			target: "linux-musl-x86_64",
-			fileName: "omp-linux-musl-x64",
+			fileName: "mop-linux-musl-x64",
 		});
 		expect(resolveBuildHost("linux", "arm64", false)).toEqual({
 			target: "linux-arm64",
-			fileName: "omp-linux-arm64",
+			fileName: "mop-linux-arm64",
 		});
 		expect(resolveBuildHost("win32", "x64", false)).toEqual({
 			target: "windows-x86_64",
-			fileName: "omp-windows-x64.exe",
+			fileName: "mop-windows-x64.exe",
 		});
 	});
 
@@ -146,9 +146,9 @@ describe("fetchBuild", () => {
 
 		expect(requests).toHaveLength(1);
 		expect(requests[0].url).toBe(
-			"https://build.test/api/products/omp/latest/macos-arm64?channel=canary&from_version=18.8.8",
+			"https://build.test/api/products/mop/latest/macos-arm64?channel=canary&from_version=18.8.8",
 		);
-		expect(requests[0].userAgent).toBe(`omp/${VERSION}`);
+		expect(requests[0].userAgent).toBe(`mop/${VERSION}`);
 		expect(requests[0].signal).toBeInstanceOf(AbortSignal);
 		expect(build.patch?.fromVersion).toBe("18.8.8");
 	});
@@ -168,7 +168,7 @@ describe("fetchBuild", () => {
 			},
 		);
 
-		expect(url).toBe("https://build.stencil.so/api/products/omp/versions/18.8.9/macos-arm64");
+		expect(url).toBe("https://build.stencil.so/api/products/mop/versions/18.8.9/macos-arm64");
 	});
 
 	it("names the target when nothing is published for it", async () => {
@@ -177,6 +177,6 @@ describe("fetchBuild", () => {
 				{ channel: "stable" },
 				{ host, fetchImpl: async () => Response.json({ error: "no_build" }, { status: 404 }) },
 			),
-		).rejects.toThrow("No omp stable build for macos-arm64 is published");
+		).rejects.toThrow("No mop stable build for macos-arm64 is published");
 	});
 });

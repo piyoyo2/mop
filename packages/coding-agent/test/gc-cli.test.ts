@@ -121,7 +121,7 @@ async function writeConfig(agentDir: string, body: string): Promise<void> {
 }
 
 async function writeProjectConfig(projectDir: string, body: string): Promise<void> {
-	const configDir = path.join(projectDir, ".omp");
+	const configDir = path.join(projectDir, ".mop");
 	await fs.mkdir(configDir, { recursive: true });
 	await Bun.write(path.join(configDir, "config.yml"), body);
 }

@@ -27,7 +27,7 @@ import defaultPersonality from "./prompts/system/personalities/default.md" with 
 import friendlyPersonality from "./prompts/system/personalities/friendly.md" with { type: "text" };
 import pragmaticPersonality from "./prompts/system/personalities/pragmatic.md" with { type: "text" };
 import projectPromptTemplate from "./prompts/system/project-prompt.md" with { type: "text" };
-import systemPromptTemplate from "./prompts/system/system-prompt.md" with { type: "text" };
+import systemPromptTemplate from "./prompts/system/mop-system-prompt.md" with { type: "text" };
 import userAppendPromptTemplate from "./prompts/system/user-append.md" with { type: "text" };
 import { normalizeConcurrencyLimit } from "./task/parallel";
 import type { ActiveRepoContext } from "@oh-my-pi/pi-tui/status-line/host";
@@ -100,7 +100,7 @@ const PERSONALITY_SPECS: Record<Exclude<Personality, "none">, string> = {
 
 /**
  * Load the user-level PERSONALITY.md override for the system prompt's
- * personality block from `<agentDir>/PERSONALITY.md` (`~/.omp/agent` by
+ * personality block from `<agentDir>/PERSONALITY.md` (`~/.mop/agent` by
  * default; profile, XDG, and `PI_CODING_AGENT_DIR` aware). Returns null when
  * the file is absent, empty, or unreadable; callers then render the configured
  * preset. Read failures other than a missing file warn instead of failing the

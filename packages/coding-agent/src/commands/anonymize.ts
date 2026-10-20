@@ -18,7 +18,7 @@ export default class Anonymize extends Command {
 	static examples = [
 		"omp anonymize",
 		"omp anonymize 01a0285c -o ./bug-report",
-		"omp anonymize ~/.omp/agent/sessions/--work-pi--/session.jsonl",
+		"omp anonymize ~/.mop/agent/sessions/--work-pi--/session.jsonl",
 	];
 
 	async run(): Promise<void> {

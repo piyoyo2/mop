@@ -157,7 +157,7 @@ describe("plugin config", () => {
 				settings: {},
 			}),
 		);
-		const projectPluginsDir = path.join(tmpRoot, ".omp", "plugins");
+		const projectPluginsDir = path.join(tmpRoot, ".mop", "plugins");
 		const projectInstallPath = path.join(tmpRoot, "project-cache", pluginName);
 		const projectPluginPath = path.join(projectPluginsDir, "node_modules", pluginName);
 		await Bun.write(
@@ -209,7 +209,7 @@ describe("plugin config", () => {
 				settings: { splitMode: { type: "enum", values: ["auto", "manual"], default: schemaDefault } },
 			},
 		});
-		const projectRoot = path.join(tmpRoot, ".omp", "plugins");
+		const projectRoot = path.join(tmpRoot, ".mop", "plugins");
 		await fs.mkdir(path.join(projectRoot, "node_modules"), { recursive: true });
 		await fs.symlink(installPath, path.join(projectRoot, "node_modules", "omp-commit"), "dir");
 		await Bun.write(

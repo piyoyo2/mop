@@ -46,7 +46,7 @@ describe("skillshare discovery provider", () => {
 		project = path.join(tempHome, "work", "proj");
 		await fs.mkdir(path.join(project, ".git"), { recursive: true });
 		vi.spyOn(os, "homedir").mockReturnValue(tempHome);
-		setAgentDir(path.join(tempHome, ".omp", "agent"));
+		setAgentDir(path.join(tempHome, ".mop", "agent"));
 	});
 
 	afterEach(async () => {
@@ -59,7 +59,7 @@ describe("skillshare discovery provider", () => {
 	it("does not treat a home-root lock as project scope while preserving the user lock", async () => {
 		await storeSkill("mallory", "home-root", "1.0.0", "Home root registry skill");
 		await storeSkill("alice", "user", "1.0.0", "User registry skill");
-		await writeSkillsLock(path.join(tempHome, ".omp", "skills.lock.json"), {
+		await writeSkillsLock(path.join(tempHome, ".mop", "skills.lock.json"), {
 			version: 1,
 			skills: { "@mallory/home-root": lockEntry("mallory", "home-root", "1.0.0") },
 		});
@@ -79,13 +79,13 @@ describe("skillshare discovery provider", () => {
 		const localProject = path.join(foreignHome, "project");
 		const cwd = path.join(localProject, "nested");
 		await fs.mkdir(cwd, { recursive: true });
-		await fs.mkdir(path.join(foreignHome, ".omp", "agent"), { recursive: true });
+		await fs.mkdir(path.join(foreignHome, ".mop", "agent"), { recursive: true });
 		await storeSkill("mallory", "foreign", "1.0.0", "Foreign registry skill");
 		await storeSkill("alice", "local", "1.0.0", "Local registry skill");
 		await storeSkill("alice", "user", "1.0.0", "User registry skill");
 		for (const [root, scope, name] of [
-			[path.join(foreignHome, ".omp"), "mallory", "foreign"],
-			[path.join(localProject, ".omp"), "alice", "local"],
+			[path.join(foreignHome, ".mop"), "mallory", "foreign"],
+			[path.join(localProject, ".mop"), "alice", "local"],
 			[getAgentDir(), "alice", "user"],
 		] as const) {
 			await writeSkillsLock(path.join(root, "skills.lock.json"), {
@@ -105,12 +105,12 @@ describe("skillshare discovery provider", () => {
 
 	it("keeps a repo-local session agent directory's project lock and the process user lock", async () => {
 		const cwd = path.join(project, "nested");
-		const agentDir = path.join(project, ".omp", "agent");
+		const agentDir = path.join(project, ".mop", "agent");
 		await fs.mkdir(cwd, { recursive: true });
 		await fs.mkdir(agentDir, { recursive: true });
 		await storeSkill("alice", "local", "1.0.0", "Local registry skill");
 		await storeSkill("alice", "user", "1.0.0", "User registry skill");
-		await writeSkillsLock(path.join(project, ".omp", "skills.lock.json"), {
+		await writeSkillsLock(path.join(project, ".mop", "skills.lock.json"), {
 			version: 1,
 			skills: { "@alice/local": lockEntry("alice", "local", "1.0.0") },
 		});
@@ -136,12 +136,12 @@ describe("skillshare discovery provider", () => {
 		vi.spyOn(os, "tmpdir").mockReturnValue(tempRoot);
 		await storeSkill("alice", "local", "1.0.0", "Local registry skill");
 		await storeSkill("mallory", "temporary", "1.0.0", "Temporary root registry skill");
-		await writeSkillsLock(path.join(localProject, ".omp", "skills.lock.json"), {
+		await writeSkillsLock(path.join(localProject, ".mop", "skills.lock.json"), {
 			version: 1,
 			skills: { "@alice/local": lockEntry("alice", "local", "1.0.0") },
 		});
 		for (const root of [tempRoot, tempHome]) {
-			await writeSkillsLock(path.join(root, ".omp", "skills.lock.json"), {
+			await writeSkillsLock(path.join(root, ".mop", "skills.lock.json"), {
 				version: 1,
 				skills: { "@mallory/temporary": lockEntry("mallory", "temporary", "1.0.0") },
 			});
@@ -162,7 +162,7 @@ describe("skillshare discovery provider", () => {
 			},
 		};
 		const userLock: SkillsLock = { version: 1, skills: { "@bob/review": lockEntry("bob", "review", "2.0.0") } };
-		await writeSkillsLock(path.join(project, ".omp", "skills.lock.json"), projectLock);
+		await writeSkillsLock(path.join(project, ".mop", "skills.lock.json"), projectLock);
 		await writeSkillsLock(path.join(getAgentDir(), "skills.lock.json"), userLock);
 		const pdfDir = await storeSkill("alice", "pdf-tools", "1.2.0", "PDF helpers");
 		await storeSkill("bob", "review", "2.0.0", "Code review");
@@ -200,7 +200,7 @@ describe("skillshare discovery provider", () => {
 		await fs.mkdir(realStore, { recursive: true });
 		await fs.mkdir(path.dirname(getSkillshareStoreDir()), { recursive: true });
 		await fs.symlink(realStore, getSkillshareStoreDir());
-		await writeSkillsLock(path.join(project, ".omp", "skills.lock.json"), {
+		await writeSkillsLock(path.join(project, ".mop", "skills.lock.json"), {
 			version: 1,
 			skills: { "@alice/pdf-tools": lockEntry("alice", "pdf-tools", "1.2.0") },
 		});
@@ -217,12 +217,12 @@ describe("skillshare discovery provider", () => {
 	});
 
 	it("lets an authored project skill win a name collision", async () => {
-		await writeSkillsLock(path.join(project, ".omp", "skills.lock.json"), {
+		await writeSkillsLock(path.join(project, ".mop", "skills.lock.json"), {
 			version: 1,
 			skills: { "@alice/pdf-tools": lockEntry("alice", "pdf-tools", "1.2.0") },
 		});
 		await storeSkill("alice", "pdf-tools", "1.2.0", "Registry PDF helpers");
-		const authored = path.join(project, ".omp", "skills", "pdf-tools", "SKILL.md");
+		const authored = path.join(project, ".mop", "skills", "pdf-tools", "SKILL.md");
 		await fs.mkdir(path.dirname(authored), { recursive: true });
 		await Bun.write(authored, "---\nname: pdf-tools\ndescription: Local PDF helpers\n---\n# local\n");
 
@@ -241,7 +241,7 @@ describe("skillshare discovery provider", () => {
 			// the directory scanner's checks: the boundary that must hold is `loadSkills`.
 			const collisions = path.resolve(import.meta.dirname, "../fixtures/skills-collision");
 			const [first, second] = [path.join(collisions, "first"), path.join(collisions, "second")];
-			await writeSkillsLock(path.join(project, ".omp", "skills.lock.json"), {
+			await writeSkillsLock(path.join(project, ".mop", "skills.lock.json"), {
 				version: 1,
 				skills: { "@mallory/evil": lockEntry("mallory", "evil", "1.0.0") },
 			});

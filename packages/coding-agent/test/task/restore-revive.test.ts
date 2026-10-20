@@ -48,7 +48,7 @@ beforeEach(async () => {
 	await fs.mkdir(home, { recursive: true });
 	restoreEnvValue("HOME", home);
 	vi.spyOn(os, "homedir").mockReturnValue(home);
-	setAgentDir(path.join(home, ".omp", "agent"));
+	setAgentDir(path.join(home, ".mop", "agent"));
 	AgentRegistry.resetGlobalForTests();
 	AgentLifecycleManager.resetGlobalForTests();
 	registerMockApi(MOCK_API_SOURCE);

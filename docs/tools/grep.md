@@ -23,7 +23,7 @@
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `pattern` | `string` | Yes | Regex pattern. `grep.ts` rejects whitespace-only input but preserves it verbatim. The native matcher tries Rust regex first, then PCRE2 for features such as lookaround/backreferences, then targeted literal recovery for malformed braces/parentheses. Multiline is enabled only when the pattern contains a literal newline or the two-character sequence `\\n`. |
-| `path` | `string` | No | One file path, directory path, glob-like path, archive member, readable external URL, internal URL, or one-file line selector such as `src/foo.ts:50-100` — or several of those as a semicolon-delimited list (`"src; tests"`). Omitted or empty defaults to `.`. Empty entries are rejected. Semicolon-delimited lists split unconditionally; entries accidentally joined with comma or whitespace are expanded only after existence validation; existing paths containing delimiters stay intact. Internal URLs may glob below their root (`local://*.md`, `omp://**/*.md`). |
+| `path` | `string` | No | One file path, directory path, glob-like path, archive member, readable external URL, internal URL, or one-file line selector such as `src/foo.ts:50-100` — or several of those as a semicolon-delimited list (`"src; tests"`). Omitted or empty defaults to `.`. Empty entries are rejected. Semicolon-delimited lists split unconditionally; entries accidentally joined with comma or whitespace are expanded only after existence validation; existing paths containing delimiters stay intact. Internal URLs may glob below their root (`local://*.md`, `mop://**/*.md`). |
 | `case` | `boolean` | No | Case-sensitive search. Defaults to `true`. Passed to native `ignoreCase`. |
 | `gitignore` | `boolean` | No | Respect `.gitignore` during directory scans. Defaults to `true`. |
 | `skip` | `number \| null` | No | File-page offset for multi-file results. Omitted or `null` means `0`; `grep.ts` floors finite numbers and rejects negative or non-finite values. Single-file searches ignore it because they do not paginate by file. |
@@ -78,7 +78,7 @@ The tool returns a single text block in `content[0].text` plus structured `detai
    - `maxCountPerFile`: the per-file match cap plus one for ordinary searches. Line-range searches enlarge both native fetch caps before filtering so earlier out-of-range matches do not exhaust the visible in-range budget;
    - `mode: content`;
    - the combined abort `signal` and `timeoutMs: SEARCH_GREP_TIMEOUT_MS` (`30_000`);
-   - `filesystem`: the URL filesystem's `shellFilesystem()`. URL paths resolve through it natively: file-backed schemes (`local://`, `skill://`, `artifact://`) redirect to their host files, virtual schemes (`omp://`, `history://`) serve rendered read-only files and enumerated directories. Host paths never leave native code.
+   - `filesystem`: the URL filesystem's `shellFilesystem()`. URL paths resolve through it natively: file-backed schemes (`local://`, `skill://`, `artifact://`) redirect to their host files, virtual schemes (`mop://`, `history://`) serve rendered read-only files and enumerated directories. Host paths never leave native code.
 10. Native execution happens in `crates/pi-natives/src/grep.rs`:
    - `build_matcher()` sanitizes non-quantifier braces and first tries the Rust regex engine;
    - patterns unsupported by Rust regex (including lookaround/backreferences) retry with PCRE2;
@@ -112,7 +112,7 @@ The tool returns a single text block in `content[0].text` plus structured `detai
 4. **Archive member paths**
    - Supported for UTF-8 text entries only. The member is extracted to a temporary scratch file for native grep, then displayed as `archive.ext:member`.
 5. **Internal URL paths**
-   - Native grep walks and reads them through the URL filesystem (`skill://<name>` searches the skill directory; `omp://` walks every embedded documentation file, so it works as a docs search root). Hits are named by full URL.
+   - Native grep walks and reads them through the URL filesystem (`skill://<name>` searches the skill directory; `mop://` walks every embedded documentation file, so it works as a docs search root). Hits are named by full URL.
    - URL globs split into base URL + glob (`local://notes/**/*.md`, `local://*.md`).
    - A directory resource the filesystem cannot list (a remote `ssh://` directory) fails with `… lists only through the read tool` instead of searching its listing text.
    - Sources from immutable schemes suppress editable hashline anchors; `local://` hits keep them.

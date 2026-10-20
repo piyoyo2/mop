@@ -81,7 +81,7 @@ const paramsSchema = type({
 
 type RatchetParams = typeof paramsSchema.infer;
 
-/** Read-only actions never mutate flow state; everything else writes `.omp/ratchet/<flow>/`. */
+/** Read-only actions never mutate flow state; everything else writes `.mop/ratchet/<flow>/`. */
 export function ratchetApproval(args: unknown): ToolApprovalDecision {
 	if (args === null || typeof args !== "object" || !("action" in args)) return "write";
 	return args.action === "status" || args.action === "check" || args.action === "train" ? "read" : "write";

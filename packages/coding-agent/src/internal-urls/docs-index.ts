@@ -1,5 +1,5 @@
 /**
- * Harness documentation index for the `omp://` protocol.
+ * Harness documentation index for the `mop://` protocol.
  *
  * Compiled binaries and the prepacked npm bundle inline a compressed index of the
  * docs (injected via `process.env.PI_DOCS_EMBED` at build time). The format is two lines:
@@ -113,10 +113,10 @@ function readShippedEmbed(): DocsIndex | null {
 	return decoded;
 }
 
-/** Empty index for when no docs corpus is reachable — degrades `omp://` instead of throwing ENOENT at callers. */
+/** Empty index for when no docs corpus is reachable — degrades `mop://` instead of throwing ENOENT at callers. */
 function emptyIndex(): DocsIndex {
 	logger.warn(
-		"omp:// docs corpus unavailable: no build-time embed, on-disk docs/ directory, or shipped dist embed found",
+		"mop:// docs corpus unavailable: no build-time embed, on-disk docs/ directory, or shipped dist embed found",
 	);
 	return { filenames: [], getBody: () => Promise.resolve(undefined) };
 }
@@ -168,7 +168,7 @@ export function getDocFilenames(): readonly string[] {
 /**
  * Filesystem root backing the corpus when the active index was read from disk
  * (a monorepo checkout), or `null` when it came from an embed, the shipped
- * bundle file, or nowhere. Renderers use this to decide whether an `omp://`
+ * bundle file, or nowhere. Renderers use this to decide whether an `mop://`
  * URL has a real file to link to: probing `docs/` unconditionally would
  * resolve into the consumer's own tree (their project's `docs/settings.md`,
  * `node_modules/docs`) on installs where the corpus is embedded.

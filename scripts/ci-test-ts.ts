@@ -106,9 +106,9 @@ const nativeAndIntegrationPackages = [
 ];
 
 const projectToolTestCommand: TestCommand = {
-	label: ".omp/tests (project-local TUI debug tool)",
+	label: ".mop/tests (project-local TUI debug tool)",
 	cwd: ".",
-	command: ["bun", "test", ...onlyFailuresArgs, "./.omp/tests/tui.test.ts"],
+	command: ["bun", "test", ...onlyFailuresArgs, "./.mop/tests/tui.test.ts"],
 	parallel: 1,
 };
 

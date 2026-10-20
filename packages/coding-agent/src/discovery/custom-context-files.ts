@@ -24,7 +24,7 @@ interface ConfiguredNames {
 	/**
 	 * Whether names may be read from the user agent directory. Not when a project
 	 * config supplied the list: a repository must not pull files such as
-	 * `config.yml` from `~/.omp/agent` into the prompt.
+	 * `config.yml` from `~/.mop/agent` into the prompt.
 	 */
 	includeAgentDir: boolean;
 }

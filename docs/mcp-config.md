@@ -16,19 +16,19 @@ Source of truth in code:
 
 OMP can discover MCP servers from multiple tools (`.claude/`, `.cursor/`, `.vscode/`, `opencode.json`, and more), but for OMP-native configuration you should usually use one of these primary files:
 
-- Project: `.omp/mcp.json`
-- User: `~/.omp/agent/mcp.json` (or `~/.omp/profiles/<name>/agent/mcp.json` when a named profile is active — see [Profiles](#profiles))
+- Project: `.mop/mcp.json`
+- User: `~/.mop/agent/mcp.json` (or `~/.mop/profiles/<name>/agent/mcp.json` when a named profile is active — see [Profiles](#profiles))
 
-The native provider also reads `.omp/.mcp.json` and `~/.omp/agent/.mcp.json` for compatibility, but OMP writes to the primary `mcp.json` paths above.
+The native provider also reads `.mop/.mcp.json` and `~/.mop/agent/.mcp.json` for compatibility, but OMP writes to the primary `mcp.json` paths above.
 
-These user paths are defaults: `PI_CONFIG_DIR` changes the home config root, and `PI_CODING_AGENT_DIR` can override the default-profile agent directory. Named profiles derive their own agent directory rather than inheriting that override. Project config remains in `.omp/`.
+These user paths are defaults: `PI_CONFIG_DIR` changes the home config root, and `PI_CODING_AGENT_DIR` can override the default-profile agent directory. Named profiles derive their own agent directory rather than inheriting that override. Project config remains in `.mop/`.
 
 OMP also accepts fallback standalone files in the project root:
 
 - `mcp.json`
 - `.mcp.json`
 
-Use `.omp/mcp.json` or `~/.omp/agent/mcp.json` when you want OMP to own the configuration. Use root `mcp.json` / `.mcp.json` only when you want a portable fallback file that other MCP clients may also read.
+Use `.mop/mcp.json` or `~/.mop/agent/mcp.json` when you want OMP to own the configuration. Use root `mcp.json` / `.mcp.json` only when you want a portable fallback file that other MCP clients may also read.
 
 ### Imported tool configs
 
@@ -49,12 +49,12 @@ For Claude Code, Codex, Gemini CLI, Cursor, and Windsurf, the project entry is e
 
 Named profiles (`omp --profile <name>` or `OMP_PROFILE`/`PI_PROFILE`) isolate user-level MCP config. `omp --profile <name> --alias <command>` creates a shell shortcut that selects that profile. When a profile is active, the **user** scope resolves to the profile's agent directory instead of the default one:
 
-- Default profile: `~/.omp/agent/mcp.json`
-- Profile `<name>`: `~/.omp/profiles/<name>/agent/mcp.json`
+- Default profile: `~/.mop/agent/mcp.json`
+- Profile `<name>`: `~/.mop/profiles/<name>/agent/mcp.json`
 
-Discovery, the `/mcp` commands, and the config writer all follow the active profile, so a profile sees **only** its own user-level servers — never the default profile's `~/.omp/agent/mcp.json`. Add a server to a profile by launching under it (`omp --profile <name>`) and running `/mcp add` → User level, or by editing `~/.omp/profiles/<name>/agent/mcp.json` directly.
+Discovery, the `/mcp` commands, and the config writer all follow the active profile, so a profile sees **only** its own user-level servers — never the default profile's `~/.mop/agent/mcp.json`. Add a server to a profile by launching under it (`omp --profile <name>`) and running `/mcp add` → User level, or by editing `~/.mop/profiles/<name>/agent/mcp.json` directly.
 
-Project-scoped MCP config (`.omp/mcp.json`) is keyed to the working directory, not the profile, so it applies under every profile. External-tool configs (`.claude/`, `.cursor/`, etc.) are also profile-independent because they belong to those tools rather than to an OMP profile.
+Project-scoped MCP config (`.mop/mcp.json`) is keyed to the working directory, not the profile, so it applies under every profile. External-tool configs (`.claude/`, `.cursor/`, etc.) are also profile-independent because they belong to those tools rather than to an OMP profile.
 
 MCP follows the same profile rules as the rest of OMP-native config; see [Configuration Discovery → Profiles](./config-usage.md#profiles).
 
@@ -513,9 +513,9 @@ OMP loads providers in descending priority. The MCP-capable order is:
 
 Across providers, the first definition wins. Duplicate names are not merged; OpenCode's internal config layers are the exception described above. A differently named definition is also shadowed when its transport, endpoint/command inputs, auth, and request-id mode are equivalent to a higher-priority definition.
 
-Within OMP native config, project `.omp/mcp.json` precedes `.omp/.mcp.json`, then the active profile's user `mcp.json` and `.mcp.json`. Root fallback `mcp.json` precedes root `.mcp.json`. In practice:
+Within OMP native config, project `.mop/mcp.json` precedes `.mop/.mcp.json`, then the active profile's user `mcp.json` and `.mcp.json`. Root fallback `mcp.json` precedes root `.mcp.json`. In practice:
 
-- prefer `.omp/mcp.json` or the active profile's user `mcp.json` for an OMP-specific override
+- prefer `.mop/mcp.json` or the active profile's user `mcp.json` for an OMP-specific override
 - keep names and endpoint definitions unique across tools when possible
 - use the user `disabledServers` list when a third-party config keeps reintroducing an unwanted server
 - set `mcp.enableProjectConfig: false` to exclude every project-level source before deduplication, allowing a same-named user entry to survive
@@ -547,7 +547,7 @@ Run `/mcp list`. OMP discovers many third-party MCP files, but project-level loa
 
 OMP drops recognized browser-automation servers at config load, before any connection attempt, whenever the built-in browser prelude is callable: `browser.enabled` is true (the default), Eval is registered and active, and the session is not restricted to explicitly named tools. The filter matches servers named `playwright`, `puppeteer`, `browserbase`, `browser-tools`, `browser-use` or `browser`, stdio servers whose command or args match one of a fixed set of recognized browser-MCP package patterns (`@playwright/mcp`, `@modelcontextprotocol/server-puppeteer`, `@browserbasehq/mcp-server-browserbase`, `@agentdeskai/browser-tools-mcp`, `@agent-infra/mcp-server-browser`, `puppeteer-mcp`, `playwright-mcp`, `pptr-mcp`, `browser-use-mcp`, `mcp-browser-use`), or HTTP/SSE servers whose URL points at browserbase.com or browser-use.com. Any other package (for example `chrome-devtools-mcp` under a server name outside the list above) is not matched. This filter is separate from `disabledServers`.
 
-The drop is quiet, but not equally visible everywhere: servers from any source other than the two primary files (`~/.omp/agent/mcp.json` and `.omp/mcp.json`) never reach `/mcp list`. Third-party configs, root `mcp.json` / `.mcp.json` fallbacks, and servers from OMP extension packages all vanish once filtered. An entry in one of the two primary files still shows up there as `not connected`, so a missing server with a primary-file entry may have been filtered. No error or warning is recorded either way.
+The drop is quiet, but not equally visible everywhere: servers from any source other than the two primary files (`~/.mop/agent/mcp.json` and `.mop/mcp.json`) never reach `/mcp list`. Third-party configs, root `mcp.json` / `.mcp.json` fallbacks, and servers from OMP extension packages all vanish once filtered. An entry in one of the two primary files still shows up there as `not connected`, so a missing server with a primary-file entry may have been filtered. No error or warning is recorded either way.
 
 To run a browser MCP server instead of the native browser tool, set `browser.enabled: false` in your settings. `omp read` does not apply this filter.
 

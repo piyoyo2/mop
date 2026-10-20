@@ -4,6 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { isEnoent } from "@oh-my-pi/pi-utils";
 import { buildDocsIndexPayload } from "./generate-docs-index";
+import { buildSkillsIndexPayload } from "./generate-skills-index";
 import { createJsonParsePlugin } from "./json-parse-plugin";
 import { createLegacyPiVirtualModulePlugin } from "./legacy-pi-virtual-module";
 
@@ -63,6 +64,7 @@ async function cleanBundleOutputs(outDir: string): Promise<void> {
 				entry =>
 					entry === "cli.js" ||
 					entry === "docs-index.generated.txt" ||
+					entry === "skills-index.generated.txt" ||
 					entry.endsWith(".node") ||
 					entry.endsWith(".js.map") ||
 					/\.json-[^/]+\.zst$/.test(entry) ||
@@ -85,9 +87,10 @@ export async function bundleDist(outDir: string = defaultOutDir): Promise<void> 
 	// One payload for both consumers: inlined into dist/cli.js via `--define` for
 	// the bundled CLI entrypoint, and written to dist/docs-index.generated.txt so
 	// SDK consumers importing `@oh-my-pi/pi-coding-agent/*` (TypeScript source, no
-	// build-time embed) can still resolve omp:// docs (see src/internal-urls/docs-index.ts).
+	// build-time embed) can still resolve mop:// docs (see src/internal-urls/docs-index.ts).
 	try {
 		const docsPayload = await buildDocsIndexPayload();
+		const skillsPayload = await buildSkillsIndexPayload();
 		// Build in-process: the docs embed payload is far larger than Linux's
 		// 128KiB per-argv-string cap, so it can never be passed as a CLI
 		// `--define` (posix_spawn fails with E2BIG).
@@ -100,6 +103,7 @@ export async function bundleDist(outDir: string = defaultOutDir): Promise<void> 
 			define: {
 				"process.env.PI_BUNDLED": JSON.stringify("true"),
 				"process.env.PI_DOCS_EMBED": JSON.stringify(docsPayload.payload),
+				"process.env.PI_SKILLS_EMBED": JSON.stringify(skillsPayload.payload),
 			},
 			minify: {
 				whitespace: true,
@@ -114,6 +118,7 @@ export async function bundleDist(outDir: string = defaultOutDir): Promise<void> 
 		}
 		await ensureShebang(cliPath);
 		await Bun.write(path.join(outDir, "docs-index.generated.txt"), docsPayload.payload);
+		await Bun.write(path.join(outDir, "skills-index.generated.txt"), skillsPayload.payload);
 	} finally {
 		await runCommand(["bun", "--cwd=../stats", "run", "gen:stats:reset"]);
 	}

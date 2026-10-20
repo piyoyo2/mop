@@ -1,7 +1,7 @@
 /**
  * Skillshare install manifest (`skills.json`) and lockfile (`skills.lock.json`).
  *
- * Project files live in the active project's `.omp/` directory (the same root
+ * Project files live in the active project's `.mop/` directory (the same root
  * the plugin registry uses); user-global files live in the agent dir. Unpacked
  * packages live in a shared store: `<config root>/skillshare/@scope/name/<version>/`.
  */
@@ -62,14 +62,14 @@ export function parseSkillId(id: string): { scope: string; name: string } | null
 	return { scope: id.slice(1, slash), name: id.slice(slash + 1) };
 }
 
-/** Manifest + lock paths for the user-global install (`~/.omp/agent/`). */
+/** Manifest + lock paths for the user-global install (`~/.mop/agent/`). */
 export function getGlobalSkillsInstallPaths(): SkillsInstallPaths {
 	return installPathsIn(getAgentDir());
 }
 
 /**
- * Manifest + lock paths for a project: the nearest `.omp/` walking up from
- * `cwd`, else the git root's `.omp/`, else `<cwd>/.omp/`. Throws when `cwd` is
+ * Manifest + lock paths for a project: the nearest `.mop/` walking up from
+ * `cwd`, else the git root's `.mop/`, else `<cwd>/.mop/`. Throws when `cwd` is
  * a discovery ceiling or a user config root rather than a project root.
  */
 export async function getProjectSkillsInstallPaths(cwd: string): Promise<SkillsInstallPaths> {
@@ -77,7 +77,7 @@ export async function getProjectSkillsInstallPaths(cwd: string): Promise<SkillsI
 	if (!registryPath) {
 		throw new Error("This directory is not a project root; pass --global to install for your user.");
 	}
-	// `<root>/.omp/plugins/installed_plugins.json` → `<root>/.omp`
+	// `<root>/.mop/plugins/installed_plugins.json` → `<root>/.mop`
 	return installPathsIn(path.dirname(path.dirname(registryPath)));
 }
 

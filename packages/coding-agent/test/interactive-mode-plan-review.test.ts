@@ -2387,7 +2387,7 @@ describe("InteractiveMode plan review rendering", () => {
 			title: "AUTOSAVE",
 		});
 
-		const saved = path.join(tempDir.path(), ".omp", "plans", "AUTOSAVE_PLAN.md");
+		const saved = path.join(tempDir.path(), ".mop", "plans", "AUTOSAVE_PLAN.md");
 		expect(await Bun.file(saved).text()).toBe("# Plan\n\nAutosave me.");
 		expect(status).toHaveBeenCalledWith(expect.stringContaining("Saved plan to"));
 	});

@@ -100,7 +100,7 @@ export const cfgModelRoleStorage = register({
 			{
 				value: "project",
 				label: "Per-project",
-				description: "Save project role models in .omp/config.yml; missing project roles use global defaults",
+				description: "Save project role models in .mop/config.yml; missing project roles use global defaults",
 			},
 		],
 	},

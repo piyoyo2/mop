@@ -4721,7 +4721,7 @@ function nestNames(names: readonly string[]): ChartGroup[] | undefined {
 
 /**
  * Shorter names that still tell `names` apart, for labels: a path-like name
- * (`~/.omp/agent/history.db`, `openai/gpt-5.5:xhi`) by its last segment; among
+ * (`~/.mop/agent/history.db`, `openai/gpt-5.5:xhi`) by its last segment; among
  * such single-token names, a prefix or suffix all share at a separator
  * (`/vs/…`, `…:xhi`) dropped, unless only numbers or dates would remain; and
  * when most names past {@link MAX_LABEL} overflow with a description, every

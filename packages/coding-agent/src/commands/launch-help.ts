@@ -130,10 +130,10 @@ export const launchHelp = {
 		`# Include files in initial message\n  ${APP_NAME} @prompt.md @image.png "What color is the sky?"`,
 		`# Non-interactive mode (process and exit)\n  ${APP_NAME} -p "List all .ts files in src/"`,
 		`# Continue previous session\n  ${APP_NAME} --continue "What did we discuss?"`,
-		`# Pick a session back up after a crash, subagents included\n  ${APP_NAME} --restore ~/.omp/agent/sessions/--path--/session.jsonl`,
+		`# Pick a session back up after a crash, subagents included\n  ${APP_NAME} --restore ~/.mop/agent/sessions/--path--/session.jsonl`,
 		`# Create a shell shortcut for a work profile\n  ${APP_NAME} --profile work --alias omp-work`,
 		`# Use different model (fuzzy matching)\n  ${APP_NAME} --model opus "Help me refactor this code"`,
 		`# Limit model cycling to specific models\n  ${APP_NAME} --models claude-sonnet,claude-haiku,gpt-4o`,
-		`# Export a session file to HTML\n  ${APP_NAME} --export ~/.omp/agent/sessions/--path--/session.jsonl`,
+		`# Export a session file to HTML\n  ${APP_NAME} --export ~/.mop/agent/sessions/--path--/session.jsonl`,
 	],
 } satisfies CommandMetadata;

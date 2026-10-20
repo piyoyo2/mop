@@ -43,7 +43,7 @@ import {
  * Mirrors the loader's foreign gate (`allowedRoots` / `isSourceEnabled`,
  * #10666/#10743): a user-scope `claude-plugins` item whose `origin` is not the
  * foreign `~/.claude` tree is an omp-native marketplace root under
- * `~/.omp/plugins` and loads without the opt-in — so the dashboard must render
+ * `~/.mop/plugins` and loads without the opt-in — so the dashboard must render
  * it active, not a phantom `user-opt-in` disabled (#12776).
  */
 function resolveState(

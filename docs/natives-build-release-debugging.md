@@ -305,7 +305,7 @@ Typical local loop:
 
 In compiled mode (`PI_COMPILED`, Bun embedded URL markers, or populated embedded manifest):
 
-1. Loader computes versioned cache dir: `<getNativesDir()>/<packageVersion>`. The root is `PI_NATIVES_DIR` first (trimmed, `~`-expanded, and normalized; empty or relative values are ignored), then `$XDG_DATA_HOME/omp/natives` when `$XDG_DATA_HOME/omp` already exists, otherwise `~/.omp/natives`.
+1. Loader computes versioned cache dir: `<getNativesDir()>/<packageVersion>`. The root is `PI_NATIVES_DIR` first (trimmed, `~`-expanded, and normalized; empty or relative values are ignored), then `$XDG_DATA_HOME/omp/natives` when `$XDG_DATA_HOME/omp` already exists, otherwise `~/.mop/natives`.
 2. If the embedded manifest matches platform+version and has a selectable file, loader decompresses all missing or wrong-sized manifest files from their embedded `<addon>.node.zst` frames into that versioned directory.
 3. Runtime candidate order includes:
    - extracted versioned cache path, if available,

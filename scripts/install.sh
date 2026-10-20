@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-# OMP Coding Agent Installer
-# Usage: curl -fsSL https://omp.sh/install | sh
-#        curl -fsSL https://omp.sh/install | sh -s -- --binary --ref v18.8.9
+# mop Coding Agent Installer
+# Usage: curl -fsSL https://mop.sh/install | sh
+#        curl -fsSL https://mop.sh/install | sh -s -- --binary --ref v0.1.0
 #
 # Options:
 #   --source       Install via bun (installs bun if needed)
@@ -12,15 +12,23 @@ set -e
 #                  mode takes a release tag (v<version>)
 #   -r <ref>       Shorthand for --ref
 #
-# Prebuilt binaries come from the build service (PI_BUILD_URL, default
-# https://build.stencil.so) and are checked against its sha256 before install.
+# Prebuilt binaries come from the project's GitHub releases and are checked
+# against the published sha256 before install.
+#
+# Environment overrides:
+#   PI_RELEASES_URL       release asset base (default https://github.com/<repo>/releases)
+#   PI_RELEASES_API_URL   release metadata base (default https://api.github.com/repos/<repo>/releases)
 
-REPO="can1357/oh-my-pi"
-PACKAGE="@oh-my-pi/pi-coding-agent"
+REPO="soliloquy1/mop"
+PACKAGE="@mop/pi-coding-agent"
 INSTALL_DIR="${PI_INSTALL_DIR:-$HOME/.local/bin}"
-BUILD_URL="${PI_BUILD_URL:-https://build.stencil.so}"
-while [ "${BUILD_URL%/}" != "$BUILD_URL" ]; do
-    BUILD_URL="${BUILD_URL%/}"
+RELEASES_URL="${PI_RELEASES_URL:-https://github.com/${REPO}/releases}"
+RELEASES_API_URL="${PI_RELEASES_API_URL:-https://api.github.com/repos/${REPO}/releases}"
+while [ "${RELEASES_URL%/}" != "$RELEASES_URL" ]; do
+    RELEASES_URL="${RELEASES_URL%/}"
+done
+while [ "${RELEASES_API_URL%/}" != "$RELEASES_API_URL" ]; do
+    RELEASES_API_URL="${RELEASES_API_URL%/}"
 done
 MIN_BUN_VERSION="1.3.14"
 
@@ -220,8 +228,8 @@ install_via_bun() {
         }
     fi
     echo ""
-    echo "✓ Installed omp via bun"
-    echo "Run 'omp' to get started!"
+    echo "✓ Installed mop via bun"
+    echo "Run 'mop' to get started!"
 }
 
 # The string value of field "$1" in the one-line JSON on stdin (last
@@ -229,13 +237,6 @@ install_via_bun() {
 # string contents cannot fake a key.
 json_string() {
     sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p"
-}
-
-# The members of the build service answer's top-level `file` object (the
-# requested target's file). `build.files[]` lists every target's file under the
-# `files` key, so its sha256s never match here.
-json_file_object() {
-    sed -n 's/.*"file"[[:space:]]*:[[:space:]]*{\([^}]*\)}.*/\1/p'
 }
 
 # Hex sha256 of file "$1".
@@ -283,58 +284,61 @@ install_binary() {
             echo "For branch/commit installs, use --source with --ref."
             exit 1
         fi
-        echo "Fetching omp ${REF#v}..."
-        API_URL="${BUILD_URL}/api/products/omp/versions/${REF#v}/${TARGET}"
+        VERSION="${REF#v}"
     else
         echo "Fetching latest release..."
-        API_URL="${BUILD_URL}/api/products/omp/latest/${TARGET}?channel=stable"
+        RELEASE_JSON=$(curl -fsSL --connect-timeout 10 --max-time 60 \
+            "${RELEASES_API_URL}/latest") || {
+            echo "Failed to resolve the latest mop release from ${REPO}"
+            exit 1
+        }
+        VERSION=$(printf '%s' "$RELEASE_JSON" | json_string tag_name)
+        VERSION="${VERSION#v}"
+        if [ -z "$VERSION" ]; then
+            echo "Unexpected release answer from ${REPO}"
+            exit 1
+        fi
     fi
-    if ! BUILD_JSON=$(curl -fsSL --connect-timeout 10 --max-time 60 "$API_URL"); then
-        echo "Failed to resolve an omp build for ${TARGET} from ${API_URL}"
-        exit 1
-    fi
-    BUILD_JSON=$(printf '%s' "$BUILD_JSON" | tr -d '\r\n')
 
-    VERSION=$(printf '%s\n' "$BUILD_JSON" | json_string version)
-    FILE_JSON=$(printf '%s\n' "$BUILD_JSON" | json_file_object)
-    BINARY=$(printf '%s\n' "$FILE_JSON" | json_string name)
-    EXPECTED_SHA256=$(printf '%s\n' "$FILE_JSON" | json_string sha256)
-    # Go's JSON encoder writes `&` in the presigned URL as \u0026.
-    DOWNLOAD_URL=$(printf '%s\n' "$BUILD_JSON" | json_string download | sed 's/\\u0026/\&/g')
-    if [ -z "$VERSION" ] || [ -z "$BINARY" ] || [ -z "$DOWNLOAD_URL" ] ||
-        ! printf '%s\n' "$EXPECTED_SHA256" | grep -Eq '^[0-9a-f]{64}$'; then
-        echo "Unexpected answer from ${API_URL}"
-        exit 1
-    fi
+    BINARY="mop-${VERSION}-${TARGET}"
+    DOWNLOAD_URL="${RELEASES_URL}/download/v${VERSION}/${BINARY}"
+    SHA_URL="${DOWNLOAD_URL}.sha256"
     echo "Using version: $VERSION"
 
     mkdir -p "$INSTALL_DIR"
     # Download next to the destination and move it into place only once the
-    # checksum matches, so a bad download never replaces a working omp.
-    DOWNLOAD_PATH="${INSTALL_DIR}/.omp.download.$$"
-    trap 'rm -f "$DOWNLOAD_PATH"' EXIT
+    # checksum matches, so a bad download never replaces a working mop.
+    DOWNLOAD_PATH="${INSTALL_DIR}/.mop.download.$$"
+    SHA_PATH="${INSTALL_DIR}/.mop.sha256.$$"
+    trap 'rm -f "$DOWNLOAD_PATH" "$SHA_PATH"' EXIT
     echo "Downloading ${BINARY}..."
     curl -fsSL --connect-timeout 10 --speed-limit 1024 --speed-time 30 "$DOWNLOAD_URL" -o "$DOWNLOAD_PATH"
+    curl -fsSL --connect-timeout 10 --max-time 60 "$SHA_URL" -o "$SHA_PATH"
+    EXPECTED_SHA256=$(awk '{print $1; exit}' "$SHA_PATH")
+    if ! printf '%s\n' "$EXPECTED_SHA256" | grep -Eq '^[0-9a-f]{64}$'; then
+        echo "Unexpected checksum file at ${SHA_URL}"
+        exit 1
+    fi
     ACTUAL_SHA256="$(sha256_of "$DOWNLOAD_PATH")"
     if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
         echo "Checksum mismatch for ${BINARY}: expected ${EXPECTED_SHA256}, got ${ACTUAL_SHA256}"
         exit 1
     fi
     chmod +x "$DOWNLOAD_PATH"
-    mv -f "$DOWNLOAD_PATH" "${INSTALL_DIR}/omp"
+    mv -f "$DOWNLOAD_PATH" "${INSTALL_DIR}/mop"
 
     # Verify the freshly installed binary can actually start before reporting
     # success. Bun's musl-target binaries link libstdc++/libgcc dynamically,
     # which stock Alpine/musl systems do not ship, so the download succeeds while
     # the binary exits 127 with relocation errors. Never claim success for a
     # binary that cannot run.
-    if ! SMOKE_OUTPUT="$("${INSTALL_DIR}/omp" --version 2>&1)"; then
+    if ! SMOKE_OUTPUT="$("${INSTALL_DIR}/mop" --version 2>&1)"; then
         echo ""
-        echo "✗ omp was downloaded to ${INSTALL_DIR}/omp but cannot start:"
+        echo "✗ mop was downloaded to ${INSTALL_DIR}/mop but cannot start:"
         echo "$SMOKE_OUTPUT" | sed 's/^/    /'
         if [ "$PLATFORM" = "linux-musl" ]; then
             echo ""
-            echo "The musl build links libstdc++/libgcc dynamically. Install them, then re-run 'omp':"
+            echo "The musl build links libstdc++/libgcc dynamically. Install them, then re-run 'mop':"
             if command -v apk >/dev/null 2>&1; then
                 echo "    apk add libstdc++ libgcc"
             else
@@ -345,12 +349,12 @@ install_binary() {
     fi
 
     echo ""
-    echo "✓ Installed omp to ${INSTALL_DIR}/omp"
+    echo "✓ Installed mop to ${INSTALL_DIR}/mop"
 
     # Check if in PATH
     case ":$PATH:" in
-        *":$INSTALL_DIR:"*) echo "Run 'omp' to get started!" ;;
-        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'omp'" ;;
+        *":$INSTALL_DIR:"*) echo "Run 'mop' to get started!" ;;
+        *) echo "Add ${INSTALL_DIR} to your PATH, then run 'mop'" ;;
     esac
 }
 

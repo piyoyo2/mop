@@ -55,7 +55,7 @@ describe("AgentSession advisor provider-options parity", () => {
 		authStorage = createInMemoryAuthStorage();
 		authStorage.keys.setRuntime("anthropic", "test-key");
 		// An isolated discovery cache keeps the bundled catalog authoritative; the
-		// developer's `~/.omp` models.db can drop models these tests select.
+		// developer's `~/.mop` models.db can drop models these tests select.
 		cacheDir = TempDir.createSync("@pi-advisor-parity-cache-");
 		modelRegistry = new ModelRegistry(authStorage, undefined, { cacheDbPath: cacheDir.join("models.db") });
 		const bundled = getBundledModel("anthropic", "claude-sonnet-4-5");

@@ -280,14 +280,14 @@ Especially watch for:
 
 `discoverWatchdogFiles(cwd, agentDir)` loads every readable candidate from these locations:
 
-1. user level: `<active agent dir>/WATCHDOG.md` (`~/.omp/agent/WATCHDOG.md` by default; relocated by `PI_CODING_AGENT_DIR`)
+1. user level: `<active agent dir>/WATCHDOG.md` (`~/.mop/agent/WATCHDOG.md` by default; relocated by `PI_CODING_AGENT_DIR`)
 2. project levels while walking from `cwd` upward to the git repository root, or to the home directory when no repo root is found:
    - `<dir>/WATCHDOG.md`
-   - `<dir>/.omp/WATCHDOG.md`
+   - `<dir>/.mop/WATCHDOG.md`
 
 Unlike native context files, watchdog discovery does not stop at the nearest project file. Multiple project watchdog files can load together.
 
-Candidates in hidden owner directories are ignored unless the file is inside an `.omp` directory. This keeps unrelated dot-directory conventions from being picked up accidentally while still allowing `.omp/WATCHDOG.md`.
+Candidates in hidden owner directories are ignored unless the file is inside an `.mop` directory. This keeps unrelated dot-directory conventions from being picked up accidentally while still allowing `.mop/WATCHDOG.md`.
 
 ### `@` imports
 
@@ -375,9 +375,9 @@ A continuation an advisor delivery itself starts — a steer while the primary i
 
 ### Discovery locations
 
-`WATCHDOG.yml`/`WATCHDOG.yaml` share the same user + project search path as `WATCHDOG.md`: the user-level `<active agent dir>/WATCHDOG.yml` plus every `WATCHDOG.yml`/`.omp/WATCHDOG.yml` encountered while walking from `cwd` up to the repository root (or the home directory when no repo root is found). All discovered files are loaded together; a more-specific file (project leaf > project ancestor > user) replaces an earlier entry with the same advisor slug.
+`WATCHDOG.yml`/`WATCHDOG.yaml` share the same user + project search path as `WATCHDOG.md`: the user-level `<active agent dir>/WATCHDOG.yml` plus every `WATCHDOG.yml`/`.mop/WATCHDOG.yml` encountered while walking from `cwd` up to the repository root (or the home directory when no repo root is found). All discovered files are loaded together; a more-specific file (project leaf > project ancestor > user) replaces an earlier entry with the same advisor slug.
 
-At the same directory depth, `.yml` candidates precede `.yaml` candidates, and `.omp/<filename>` precedes the standalone `<filename>`. Later entries win slug collisions; top-level instructions still concatenate.
+At the same directory depth, `.yml` candidates precede `.yaml` candidates, and `.mop/<filename>` precedes the standalone `<filename>`. Later entries win slug collisions; top-level instructions still concatenate.
 
 ## Subagents
 

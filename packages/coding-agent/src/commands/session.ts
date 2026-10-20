@@ -64,7 +64,7 @@ export default class Session extends Command {
 	};
 
 	static examples = [
-		"# Pack a session with its artifacts and image blobs\n  omp session pack ~/.omp/agent/sessions/<project>/<file>.jsonl /tmp/session.tar",
+		"# Pack a session with its artifacts and image blobs\n  omp session pack ~/.mop/agent/sessions/<project>/<file>.jsonl /tmp/session.tar",
 		"# Unpack it on another machine; prints the session file path\n  omp session unpack /tmp/session.tar --cwd ~/src/project",
 		"# Mark the local copy stale; resuming it later forks it\n  omp session moved <file>.jsonl --to cloud",
 	];

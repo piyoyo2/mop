@@ -44,7 +44,7 @@ test("warm extension analysis preserves import rewriting without reparsing", asy
 	const tempDir = TempDir.createSync("@legacy-pi-extension-cache-");
 	tempDirs.push(tempDir);
 	const cacheRoot = tempDir.path();
-	await fs.mkdir(path.join(cacheRoot, "omp"), { recursive: true });
+	await fs.mkdir(path.join(cacheRoot, "mop"), { recursive: true });
 
 	expect(await runProbe(cacheRoot)).toBe('import value from "./dependency.js?mtime=7";\n');
 
@@ -58,7 +58,7 @@ test("warm CommonJS classification of type-less script dependencies does not rep
 	const tempDir = TempDir.createSync("@legacy-pi-extension-cjs-cache-");
 	tempDirs.push(tempDir);
 	const cacheRoot = path.join(tempDir.path(), "cache");
-	await fs.mkdir(path.join(cacheRoot, "omp"), { recursive: true });
+	await fs.mkdir(path.join(cacheRoot, "mop"), { recursive: true });
 	// No `type` in package.json forces the source-level CommonJS syntax check
 	// on `dep.js`, the path every type-less npm dependency takes.
 	const extensionDir = path.join(tempDir.path(), "extension");
@@ -79,7 +79,7 @@ test("legacy extension parse cache drops obsolete CommonJS export-analysis colum
 	const tempDir = TempDir.createSync("@legacy-pi-extension-cache-schema-");
 	tempDirs.push(tempDir);
 	const cacheRoot = tempDir.path();
-	const cachePath = path.join(cacheRoot, "omp", "cache", "legacy-pi-extension-cache.db");
+	const cachePath = path.join(cacheRoot, "mop", "cache", "legacy-pi-extension-cache.db");
 	await fs.mkdir(path.dirname(cachePath), { recursive: true });
 
 	const seed = new Database(cachePath, { create: true });
@@ -109,7 +109,7 @@ test("legacy extension parse cache opens in WAL mode (#9549)", async () => {
 	const tempDir = TempDir.createSync("@legacy-pi-extension-cache-wal-");
 	tempDirs.push(tempDir);
 	const cacheRoot = tempDir.path();
-	await fs.mkdir(path.join(cacheRoot, "omp"), { recursive: true });
+	await fs.mkdir(path.join(cacheRoot, "mop"), { recursive: true });
 
 	await runProbe(cacheRoot);
 
@@ -117,7 +117,7 @@ test("legacy extension parse cache opens in WAL mode (#9549)", async () => {
 	// default delete-journal mode serialized cache writes behind per-entry
 	// journal create/delete + fsync and blocked startup for ~20s under
 	// concurrent omp processes.
-	const cachePath = path.join(cacheRoot, "omp", "cache", "legacy-pi-extension-cache.db");
+	const cachePath = path.join(cacheRoot, "mop", "cache", "legacy-pi-extension-cache.db");
 	const db = new Database(cachePath);
 	try {
 		const mode = db.query<{ journal_mode: string }, []>("PRAGMA journal_mode").get()?.journal_mode;
@@ -131,7 +131,7 @@ test("oversized-cache eviction keeps the parse cache usable when a concurrent pr
 	const tempDir = TempDir.createSync("@legacy-pi-extension-cache-evict-");
 	tempDirs.push(tempDir);
 	const cacheRoot = tempDir.path();
-	const cachePath = path.join(cacheRoot, "omp", "cache", "legacy-pi-extension-cache.db");
+	const cachePath = path.join(cacheRoot, "mop", "cache", "legacy-pi-extension-cache.db");
 	await fs.mkdir(path.dirname(cachePath), { recursive: true });
 
 	// Seed a cache whose main db file exceeds the 8 MiB eviction cap.

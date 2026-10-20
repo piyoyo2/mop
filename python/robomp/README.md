@@ -55,7 +55,7 @@ into the `tool_calls` table with credential-redacted args and results.
 ## Setup
 
 Requires Docker Compose v2 and a LiteLLM-style proxy on the host that your
-`~/.omp/agent/models.container.yml` points at (mounted into the container as `models.yml`; kept under a separate filename on the host so the host omp doesn't route through the gateway). roboomp lives inside the omp
+`~/.mop/agent/models.container.yml` points at (mounted into the container as `models.yml`; kept under a separate filename on the host so the host omp doesn't route through the gateway). roboomp lives inside the omp
 monorepo at `python/robomp/`; both the docker build context and the
 `/work/pi` bind mount default to the parent monorepo (`../..`). Override
 `PI_ROOT` only if you want a different omp checkout backing the build
@@ -230,7 +230,7 @@ The integration test spawns a real `omp --mode rpc` against an
 | `bun check failed before PR creation` | Fix the reported failure and retry `gh_open_pr`. |
 | `refusing to open PR: \`bun run test\` failed before open PR` | The repo suite is red at HEAD. Fix and commit, or `skip_checks=true` if the failure pre-exists on the default branch. |
 | `Failed to load pi_natives` | Wrong arch / missing native. `bun run pi:image` then `bun run robomp:build`. |
-| `No API key found for <provider>` | `~/.omp/agent/models.container.yml` mount missing or provider id mismatch with `ROBOMP_MODEL`. |
+| `No API key found for <provider>` | `~/.mop/agent/models.container.yml` mount missing or provider id mismatch with `ROBOMP_MODEL`. |
 
 ## Layout
 

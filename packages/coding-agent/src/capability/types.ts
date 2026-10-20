@@ -16,7 +16,7 @@ export type ExtensionRootMode = "merge" | "explicit-only";
  * `--extension` roots (always active, user-level); `configured` is the live
  * `extensions:` setting (ambient, only in `merge` mode); `configuredLevel` is
  * its provenance as resolved by `Settings` (the authority — includes foreign
- * project providers like `.claude/settings.json`, never re-derived from `.omp`
+ * project providers like `.claude/settings.json`, never re-derived from `.mop`
  * on disk); `mode` gates the ambient/installed sources.
  */
 export interface EffectiveExtensionRoots {

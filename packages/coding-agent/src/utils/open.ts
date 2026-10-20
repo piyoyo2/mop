@@ -107,7 +107,7 @@ export function openPath(urlOrPath: string): void {
 	// Detect delayed failures (exec succeeded but the opener exited non-zero)
 	// without blocking the caller. Recording them makes silent misconfigurations
 	// (e.g. `xdg-open` present but no MIME handler for `https`) diagnosable from
-	// `~/.omp/logs/omp.*.log`.
+	// `~/.mop/logs/omp.*.log`.
 	child.exited.then(
 		exitCode => {
 			if (typeof exitCode === "number" && exitCode !== 0) {

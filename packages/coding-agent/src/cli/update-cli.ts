@@ -42,9 +42,9 @@ import {
 
 import { cfgUpdateChannel } from "../modes/settings";
 
-const PACKAGE = "@oh-my-pi/pi-coding-agent";
-const HOMEBREW_FORMULA = "can1357/tap/omp";
-const MISE_TOOL = "github:can1357/oh-my-pi";
+const PACKAGE = "@mop/pi-coding-agent";
+const HOMEBREW_FORMULA = "soliloquy1/tap/mop";
+const MISE_TOOL = "github:soliloquy1/mop";
 const NIX_STORE_DIR = "/nix/store";
 const RELEASE_METADATA_TIMEOUT_MS = 30_000;
 const BINARY_DOWNLOAD_TIMEOUT_MS = 15 * 60_000;
@@ -55,11 +55,11 @@ const BINARY_DOWNLOAD_TIMEOUT_MS = 15 * 60_000;
  * disk; see {@link buildBunInstallArgs} for why this must be installed
  * explicitly rather than inherited as a transitive dependency.
  */
-const NATIVES_PACKAGE = "@oh-my-pi/pi-natives";
+const NATIVES_PACKAGE = "@mop/pi-natives";
 
 /**
  * Platform tags the release pipeline publishes as
- * `@oh-my-pi/pi-natives-<tag>` leaves. Mirrors `SUPPORTED_PLATFORMS` in
+ * `@mop/pi-natives-<tag>` leaves. Mirrors `SUPPORTED_PLATFORMS` in
  * `packages/natives/native/loader-state.js` and `LEAF_TARGETS` in
  * `packages/natives/scripts/gen-npm-packages.ts`; kept here as the local
  * source of truth so the update path stays free of cross-package imports.
@@ -117,14 +117,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  *
  * Forward-compatibility contract with future releases: a release that is not
  * installable as an npm package (e.g. a native rewrite) publishes
- * `"omp": { "dist": "binary" }` in its package.json. Any value other than
+ * `"mop": { "dist": "binary" }` in its package.json. Any value other than
  * "npm" — including values this updater does not know yet — maps to "binary"
  * so already-deployed updaters never run a package-manager install against a
  * release that no longer supports it.
  */
 export function resolveReleaseDist(manifest: unknown): ReleaseDist | undefined {
-	if (!isRecord(manifest) || !isRecord(manifest.omp)) return undefined;
-	const dist = manifest.omp.dist;
+	if (!isRecord(manifest) || !isRecord(manifest.mop)) return undefined;
+	const dist = manifest.mop.dist;
 	if (dist === undefined) return undefined;
 	return dist === "npm" ? "npm" : "binary";
 }
@@ -134,7 +134,7 @@ export function resolveReleaseDist(manifest: unknown): ReleaseDist | undefined {
  *
  * Forward-compatibility contract for renaming the npm package: the final
  * version published under an old name is a stub whose manifest carries
- * `"omp": { "rename": { "package": "<new-agent-pkg>", "natives": "<new-natives-pkg>" }, "dist": "binary" }`.
+ * `"mop": { "rename": { "package": "<new-agent-pkg>", "natives": "<new-natives-pkg>" }, "dist": "binary" }`.
  * Updaters that understand `rename` follow the pointer and resolve the
  * release from the renamed package instead ({@link getLatestRelease});
  * older deployed updaters ignore it and take the `dist: "binary"` escape
@@ -147,8 +147,8 @@ export function resolveReleaseDist(manifest: unknown): ReleaseDist | undefined {
  * "already up to date" against the running build).
  */
 export function resolveReleaseRename(manifest: unknown): ReleaseRename | undefined {
-	if (!isRecord(manifest) || !isRecord(manifest.omp)) return undefined;
-	const rename = manifest.omp.rename;
+	if (!isRecord(manifest) || !isRecord(manifest.mop)) return undefined;
+	const rename = manifest.mop.rename;
 	if (!isRecord(rename) || typeof rename.package !== "string" || rename.package.length === 0) return undefined;
 	const natives = rename.natives;
 	return {
@@ -168,7 +168,7 @@ function majorVersion(version: string): number {
  * An explicit `omp.dist` wins in both directions. Without one, a release with
  * a higher major than the running build is assumed not npm-installable: the
  * runtime may have changed out from under the package layout, and the pinned
- * `@oh-my-pi/pi-natives*` companions ({@link buildBunInstallArgs}) may not
+ * `@mop/pi-natives*` companions ({@link buildBunInstallArgs}) may not
  * exist at that version, which would strand bun/npm-managed installs behind a
  * hard install failure. Homebrew and mise installs are unaffected — both
  * already install the standalone release binaries.
@@ -488,7 +488,7 @@ interface UpdateMethodResolutionOptions {
 	 * misrouted to npm/bun when the global bin dir overlaps the installer's
 	 * target directory.
 	 */
-	ompIsRegularFile?: boolean;
+	binaryIsRegularFile?: boolean;
 	/**
 	 * Absolute path named by the bin entry's first symlink hop. This deliberately
 	 * preserves a global package symlink instead of resolving into its checkout.
@@ -532,7 +532,7 @@ function resolveUpdateMethod(
 		miseBinDirs = [],
 		miseDataDir,
 		npmBinDir,
-		ompIsRegularFile = false,
+		binaryIsRegularFile = false,
 		ompLinkTarget,
 	} = options;
 	const launcherExtension = path.extname(ompPath).toLowerCase();
@@ -556,7 +556,7 @@ function resolveUpdateMethod(
 	// `.exe` (EBUSY), so the install would stay pinned to the old version.
 	const isWindowsManagedLauncher =
 		process.platform === "win32" && (isWindowsScriptLauncher || launcherExtension === "" || bunShimMarker);
-	const isStandaloneRegularFile = ompIsRegularFile && !isWindowsManagedLauncher;
+	const isStandaloneRegularFile = binaryIsRegularFile && !isWindowsManagedLauncher;
 	const bunNodeModulesDir = resolveBunGlobalNodeModulesDirFromLocations({
 		globalDir: bunGlobalDir,
 		globalBinDir: bunBinDir,
@@ -598,14 +598,14 @@ export function resolveUpdateTargetFromPath(
 	bunBinDir: string | undefined,
 	options: UpdateMethodResolutionOptions & { allowPackageManagers: boolean },
 ): UpdateTarget {
-	let ompIsRegularFile = false;
+	let binaryIsRegularFile = false;
 	let ompIsSymlink = false;
 	let ompLinkTarget: string | undefined;
 	let ompRealpath: string | undefined;
 	const bunShimMarker = process.platform === "win32" && fs.existsSync(bunShimMarkerPath(ompPath));
 	try {
 		const stat = fs.lstatSync(ompPath);
-		ompIsRegularFile = stat.isFile() && !stat.isSymbolicLink();
+		binaryIsRegularFile = stat.isFile() && !stat.isSymbolicLink();
 		ompIsSymlink = stat.isSymbolicLink();
 		if (ompIsSymlink) {
 			const rawTarget = fs.readlinkSync(ompPath);
@@ -618,7 +618,7 @@ export function resolveUpdateTargetFromPath(
 	const method = resolveUpdateMethod(ompPath, bunBinDir, {
 		...options,
 		bunShimMarker,
-		ompIsRegularFile,
+		binaryIsRegularFile,
 		ompLinkTarget,
 	});
 	if (method === "binary") {
@@ -638,7 +638,7 @@ export function resolveUpdateTargetFromPath(
 				...options,
 				allowPackageManagers: true,
 				bunShimMarker,
-				ompIsRegularFile,
+				binaryIsRegularFile,
 				ompLinkTarget,
 			}) !== "binary";
 		const binaryPath = ompIsSymlink && !managerLauncher ? (ompRealpath ?? ompPath) : ompPath;
@@ -1047,7 +1047,7 @@ async function pruneBunCacheAfterGlobalInstall(): Promise<BunInstallCachePruneRe
 	const packageNames = globalNodeModulesDir
 		? await collectInstalledPackageNames(globalNodeModulesDir)
 		: new Set<string>();
-	if (packageNames.size === 0 && !path.basename(cacheDir).toLowerCase().includes("omp")) return undefined;
+	if (packageNames.size === 0 && !path.basename(cacheDir).toLowerCase().includes("mop")) return undefined;
 	return await pruneBunInstallCache(cacheDir, packageNames.size === 0 ? undefined : packageNames);
 }
 
@@ -1362,7 +1362,7 @@ function buildVersionedPackageInstallArgs(
  * lookup the version check just performed. See #1686.
  *
  * Also pins {@link NATIVES_PACKAGE} and the platform-specific
- * `@oh-my-pi/pi-natives-<tag>` leaf to `expectedVersion`. `bun install -g`
+ * `@mop/pi-natives-<tag>` leaf to `expectedVersion`. `bun install -g`
  * does not reliably refresh transitive `optionalDependencies` when the
  * top-level package is the only one bumped, so the native addon and its
  * version sentinel can drift out of sync with the freshly installed
@@ -2082,8 +2082,8 @@ export async function updateViaShimTakeover(
  */
 function installerHint(): string {
 	return process.platform === "win32"
-		? "& ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Binary"
-		: "curl -fsSL https://omp.sh/install | sh -s -- --binary";
+		? "& ([scriptblock]::Create((irm https://mop.sh/install.ps1))) -Binary"
+		: "curl -fsSL https://mop.sh/install | sh -s -- --binary";
 }
 
 /** Persisted channel, or undefined when settings are unavailable (SDK/test embedding without `Settings.init()`). */

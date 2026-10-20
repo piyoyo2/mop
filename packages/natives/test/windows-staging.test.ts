@@ -8,7 +8,7 @@
  *
  * The fix has two halves, both pinned by this test:
  *   1. The loader stages `nativeDir/<filename>.node` → `versionedDir/<filename>.node`
- *      (per-package-version cache under `~/.omp/natives/<version>/`) so the
+ *      (per-package-version cache under `~/.mop/natives/<version>/`) so the
  *      running process holds its OS-level handle on a path bun is never asked
  *      to overwrite. Gated to Windows + node_modules installs + non-compiled
  *      mode by `shouldStageNodeModulesAddon`.

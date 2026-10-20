@@ -58,14 +58,14 @@ describe("native hook discovery", () => {
 		root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-builtin-hooks-"));
 		const home = path.join(root, "home");
 		project = path.join(root, "project");
-		projectPre = path.join(project, ".omp", "hooks", "pre");
+		projectPre = path.join(project, ".mop", "hooks", "pre");
 		sharedHooks = path.join(root, "shared-hooks");
 		process.env.HOME = home;
 		vi.spyOn(os, "homedir").mockReturnValue(home);
-		setAgentDir(path.join(home, ".omp", "agent"));
+		setAgentDir(path.join(home, ".mop", "agent"));
 		await Promise.all([
 			fs.mkdir(projectPre, { recursive: true }),
-			fs.mkdir(path.join(home, ".omp", "agent", "hooks", "pre"), { recursive: true }),
+			fs.mkdir(path.join(home, ".mop", "agent", "hooks", "pre"), { recursive: true }),
 			fs.mkdir(sharedHooks, { recursive: true }),
 			fs.mkdir(path.join(project, ".git"), { recursive: true }),
 		]);

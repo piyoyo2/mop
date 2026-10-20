@@ -653,8 +653,8 @@ export class AcpAgent implements Agent {
 		return {
 			protocolVersion: PROTOCOL_VERSION,
 			agentInfo: {
-				name: "omp",
-				title: "omp",
+				name: "mop",
+				title: "mop",
 				version: VERSION,
 			},
 			authMethods,

@@ -124,7 +124,7 @@ describe("RotatingFileSink batching", () => {
 	function makeSink(directory: string, batch?: RotatingFileBatchOptions): RotatingFileSink {
 		return new RotatingFileSink({
 			directory,
-			filenamePrefix: "omp",
+			filenamePrefix: "mop",
 			filenameSuffix: "1234",
 			maxBytes: 1_000,
 			maxFiles: 5,

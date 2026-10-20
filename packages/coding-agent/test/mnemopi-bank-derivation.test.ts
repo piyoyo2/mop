@@ -7,7 +7,7 @@ import { computeMnemopiBankScope, extendRecallWithLegacyBanks } from "@oh-my-pi/
 import { removeWithRetries, TempDir } from "@oh-my-pi/pi-utils";
 
 // Set up a fixture filesystem we can reuse across the two regression
-// suites — same shape as `~/.omp/memories/mnemopi/` on a real install.
+// suites — same shape as `~/.mop/memories/mnemopi/` on a real install.
 let rootDir: TempDir;
 let dbDir: string;
 let banksDir: string;

@@ -15,7 +15,7 @@ it("native restart preserves the active profile and reopens its persisted sessio
 			PI_PROFILE: undefined,
 			PI_CODING_AGENT_DIR: undefined,
 			PI_CODING_AGENT_SESSION_DIR: undefined,
-			PI_CONFIG_DIR: ".omp",
+			PI_CONFIG_DIR: ".mop",
 			XDG_DATA_HOME: undefined,
 			XDG_STATE_HOME: undefined,
 			XDG_CACHE_HOME: undefined,

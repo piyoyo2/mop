@@ -66,7 +66,7 @@ describe("multiprocess file logging", () => {
 		seed.stdin.end();
 		expect(await seed.exited).toBe(0);
 		const seedLog = (await fs.readdir(logsDir)).find(name => name.endsWith(`.${seed.pid}.log`));
-		const seedDate = seedLog?.match(/^omp\.(\d{4}-\d{2}-\d{2})\./)?.[1];
+		const seedDate = seedLog?.match(/^mop\.(\d{4}-\d{2}-\d{2})\./)?.[1];
 		if (!seedDate) throw new Error("probe did not create a dated log");
 		const baseDate = new Date(`${seedDate}T12:00:00`);
 		const localDate = (daysAgo: number): string => localDayBefore(baseDate, daysAgo);

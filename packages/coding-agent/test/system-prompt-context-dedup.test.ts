@@ -118,9 +118,9 @@ describe("dedupeContainedContextFiles", () => {
 	it("treats files without a depth as less authoritative than project files", () => {
 		const user = "Shared rule.\n\nUser-only rule.";
 		const project = "Shared rule.";
-		const files = [file("/project/AGENTS.md", project, 0), file("/home/user/.omp/AGENTS.md", user)];
+		const files = [file("/project/AGENTS.md", project, 0), file("/home/user/.mop/AGENTS.md", user)];
 
-		expect(paths(dedupeContainedContextFiles(files))).toEqual(["/home/user/.omp/AGENTS.md", "/project/AGENTS.md"]);
+		expect(paths(dedupeContainedContextFiles(files))).toEqual(["/home/user/.mop/AGENTS.md", "/project/AGENTS.md"]);
 	});
 
 	it("does not treat text inside a fenced code block as a contained instruction", () => {

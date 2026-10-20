@@ -35,20 +35,20 @@ Extension loading builds an ordered list of module entry files, imports the modu
 
 Native `extension-module` discovery comes from:
 
-- Project directory: `<cwd>/.omp/extensions`
-- User directory: the active agent directory's `extensions/` (default `~/.omp/agent/extensions`)
-- Native legacy/settings JSON entries: `<cwd>/.omp/settings.json#extensions` and the active agent directory's `settings.json#extensions`
+- Project directory: `<cwd>/.mop/extensions`
+- User directory: the active agent directory's `extensions/` (default `~/.mop/agent/extensions`)
+- Native legacy/settings JSON entries: `<cwd>/.mop/settings.json#extensions` and the active agent directory's `settings.json#extensions`
 
-The project root is the native provider's `.omp` directory (`SOURCE_PATHS.native.projectDir`), cwd-only; it does not walk ancestors. Native discovery uses its `LoadContext.agentDir` when supplied, otherwise `getAgentDir()`. With the default user config root, `omp --profile <name>` selects `~/.omp/profiles/<name>/agent/extensions`. `PI_CONFIG_DIR` changes that user config root; `PI_CODING_AGENT_DIR` overrides the agent directory only in the default profile, not named profiles. See [Profiles](./config-usage.md#profiles).
+The project root is the native provider's `.mop` directory (`SOURCE_PATHS.native.projectDir`), cwd-only; it does not walk ancestors. Native discovery uses its `LoadContext.agentDir` when supplied, otherwise `getAgentDir()`. With the default user config root, `omp --profile <name>` selects `~/.mop/profiles/<name>/agent/extensions`. `PI_CONFIG_DIR` changes that user config root; `PI_CODING_AGENT_DIR` overrides the agent directory only in the default profile, not named profiles. See [Profiles](./config-usage.md#profiles).
 
 Notes:
 
-- Native auto-discovery is currently `.omp` based.
+- Native auto-discovery is currently `.mop` based.
 - Legacy `.pi` is still accepted in package manifests (`pi.extensions`) and project override lookup, but `.pi/extensions` is not a native root here.
 
 ### 2) Discovered JS/TS hook factories
 
-After native auto-discovery, `discoverAndLoadExtensions()` also appends JS/TS hook factories from the `hook` capability — any hook whose entry path is a `.ts`/`.js` file — so they load through the same module pipeline. The native provider discovers these under `<cwd>/.omp/hooks/pre|post/` and `<agentDir>/hooks/pre|post/` only; see [Hooks: native discovery location](./hooks.md#native-discovery-location) for the required `pre/`/`post/` layout.
+After native auto-discovery, `discoverAndLoadExtensions()` also appends JS/TS hook factories from the `hook` capability — any hook whose entry path is a `.ts`/`.js` file — so they load through the same module pipeline. The native provider discovers these under `<cwd>/.mop/hooks/pre|post/` and `<agentDir>/hooks/pre|post/` only; see [Hooks: native discovery location](./hooks.md#native-discovery-location) for the required `pre/`/`post/` layout.
 
 Hook-capability loading already applies its own hook-specific disabled ids, so these paths are not additionally filtered by `disabledExtensions` extension-module names.
 
@@ -77,21 +77,21 @@ Configured path sources in the main session startup path (`sdk.ts`):
 
 Native settings files:
 
-- User: the active agent directory's `config.yml`, with `config.yaml` as a fallback (default root `~/.omp/agent`; named profiles use `~/.omp/profiles/<name>/agent`). Agent-directory overrides follow the profile rules above.
-- Project/native settings capability: `<cwd>/.omp/config.yml` and `<cwd>/.omp/settings.json`
+- User: the active agent directory's `config.yml`, with `config.yaml` as a fallback (default root `~/.mop/agent`; named profiles use `~/.mop/profiles/<name>/agent`). Agent-directory overrides follow the profile rules above.
+- Project/native settings capability: `<cwd>/.mop/config.yml` and `<cwd>/.mop/settings.json`
 
 Other enabled settings providers and `--config` overlays can also supply the
 effective `extensions` value. See [Settings](./config-usage.md).
 
 Native extension-module discovery also reads legacy JSON extension lists from:
 
-- The active agent directory's `settings.json` (default `~/.omp/agent/settings.json`)
-- `<cwd>/.omp/settings.json`
+- The active agent directory's `settings.json` (default `~/.mop/agent/settings.json`)
+- `<cwd>/.mop/settings.json`
 
 Examples:
 
 ```yaml
-# ~/.omp/agent/config.yml
+# ~/.mop/agent/config.yml
 extensions:
   - ~/my-exts/safety.ts
   - ./local/ext-pack
@@ -99,7 +99,7 @@ extensions:
 
 ```json
 {
-  "extensions": ["./.omp/extensions/my-extra"]
+  "extensions": ["./.mop/extensions/my-extra"]
 }
 ```
 
@@ -351,7 +351,7 @@ described in [Extensions](./extensions.md#background-work-ctxsetinterval--ctxset
 ### User-level
 
 ```text
-~/.omp/agent/
+~/.mop/agent/
   config.yml
   extensions/
     guardrails.ts
@@ -363,7 +363,7 @@ described in [Extensions](./extensions.md#background-work-ctxsetinterval--ctxset
 
 ```text
 <repo>/
-  .omp/
+  .mop/
     settings.json
     extensions/
       checks/

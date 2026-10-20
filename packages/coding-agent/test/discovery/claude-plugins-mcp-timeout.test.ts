@@ -32,7 +32,7 @@ describe("Claude plugin MCP timeout compatibility", () => {
 		process.env.HOME = tempDir;
 		vi.spyOn(os, "homedir").mockReturnValue(tempDir);
 		// Point the agent dir at a temp dir so user-scope discovery (native MCP
-		// config, skills, etc.) cannot read the real ~/.omp/agent profile.
+		// config, skills, etc.) cannot read the real ~/.mop/agent profile.
 		setAgentDir(testAgentDir);
 		enableProvider("claude-plugins");
 	});
@@ -65,8 +65,8 @@ describe("Claude plugin MCP timeout compatibility", () => {
 	 */
 	async function installPluginWithTimeout(timeout: unknown): Promise<void> {
 		const pluginPath = path.join(tempDir, "plugins", "sap-fiori-mcp-server");
-		const registryPath = path.join(tempDir, ".omp", "plugins", "installed_plugins.json");
-		await fs.mkdir(path.join(tempDir, ".omp", "plugins"), { recursive: true });
+		const registryPath = path.join(tempDir, ".mop", "plugins", "installed_plugins.json");
+		await fs.mkdir(path.join(tempDir, ".mop", "plugins"), { recursive: true });
 		await fs.mkdir(pluginPath, { recursive: true });
 		await fs.writeFile(
 			path.join(pluginPath, ".mcp.json"),

@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- Fixed `bun test` runs writing their logs into your real `~/.omp/logs`: test processes now log to a per-user `omp-test-logs-<uid>/` under the OS temp dir ([#16386](https://github.com/can1357/oh-my-pi/pull/16386) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed `bun test` runs writing their logs into your real `~/.mop/logs`: test processes now log to a per-user `omp-test-logs-<uid>/` under the OS temp dir ([#16386](https://github.com/can1357/oh-my-pi/pull/16386) by [@will-bogusz](https://github.com/will-bogusz))
 ### Breaking Changes
 
 - `readTarEntriesFromBuffer()` in `@oh-my-pi/pi-utils/ar/tar` now returns `Promise<ArchiveIndexEntry[]>` instead of `ArchiveIndexEntry[]`; `await` its result ([#16394](https://github.com/can1357/oh-my-pi/pull/16394) by [@will-bogusz](https://github.com/will-bogusz))
@@ -108,7 +108,7 @@
 
 ### Added
 
-- Added `getNativeGrammarsDir()`, where the native addon loads downloaded tree-sitter grammars from (`~/.omp/natives/grammars`).
+- Added `getNativeGrammarsDir()`, where the native addon loads downloaded tree-sitter grammars from (`~/.mop/natives/grammars`).
 
 ### Fixed
 
@@ -159,7 +159,7 @@
 
 ### Added
 
-- Added the public `getSessionOwnersDir()` utility, which returns the profile-independent `~/.omp/run/session-owners` directory that names session ownership leases ([#14095](https://github.com/can1357/oh-my-pi/pull/14095) by [@andrebrait](https://github.com/andrebrait))
+- Added the public `getSessionOwnersDir()` utility, which returns the profile-independent `~/.mop/run/session-owners` directory that names session ownership leases ([#14095](https://github.com/can1357/oh-my-pi/pull/14095) by [@andrebrait](https://github.com/andrebrait))
 
 ### Fixed
 
@@ -338,7 +338,7 @@
 
 ### Added
 
-- Added `getBrowserProfilesDir()` (`~/.omp/browser-profiles`; XDG: `$XDG_STATE_HOME/omp/browser-profiles`) for profiles of Chromium browsers spawned by the browser tool.
+- Added `getBrowserProfilesDir()` (`~/.mop/browser-profiles`; XDG: `$XDG_STATE_HOME/omp/browser-profiles`) for profiles of Chromium browsers spawned by the browser tool.
 
 ### Fixed
 
@@ -377,7 +377,7 @@
 
 ### Added
 
-- Added the public `getTinyWorkerRuntimeDir()` utility, which returns the standard `~/.omp/run/tiny` directory for tiny-worker runtime data.
+- Added the public `getTinyWorkerRuntimeDir()` utility, which returns the standard `~/.mop/run/tiny` directory for tiny-worker runtime data.
 
 ### Fixed
 
@@ -613,7 +613,7 @@
 ### Added
 
 - Added `getSecretPlaceholderKeyPath()`, `getDaemonRuntimeDir()`, `getProviderInFlightRoot()`, and `getMarketplacesRegistryPath()` to resolve secret key, daemon runtime, provider in-flight, and marketplace registry paths under their respective XDG categories (state, data) instead of the config root.
-- Existing installs enabling XDG keep their data: a legacy `~/.omp/agent/secret-placeholder.key` or `~/.omp/marketplaces.json` is copied to its XDG location on first resolution, so persisted transcripts still deobfuscate and added marketplaces survive the move.
+- Existing installs enabling XDG keep their data: a legacy `~/.mop/agent/secret-placeholder.key` or `~/.mop/marketplaces.json` is copied to its XDG location on first resolution, so persisted transcripts still deobfuscate and added marketplaces survive the move.
 
 ### Changed
 
@@ -892,7 +892,7 @@
 ### Added
 
 - Added `runtime-install`: shared on-demand runtime dependency support — `ensureRuntimeInstalled()` (locked, idempotent `bun install` of a pinned dependency set into a cache dir) and a multi-root `installRuntimeModuleResolver()`/`resolveRuntimeModule()` for loading those graphs inside compiled binaries (Bun #1763). Extracted from the coding-agent tiny-model worker; now also backs Mnemopi's on-demand fastembed runtime ([#2389](https://github.com/can1357/oh-my-pi/issues/2389))
-- Added `getFastembedRuntimeDir()` (~/.omp/cache/fastembed-runtime) alongside `getFastembedCacheDir()`
+- Added `getFastembedRuntimeDir()` (~/.mop/cache/fastembed-runtime) alongside `getFastembedCacheDir()`
 
 ## [15.11.4] - 2026-06-12
 
@@ -981,7 +981,7 @@
 
 ### Added
 
-- Added `getFastembedCacheDir` to return the FastEmbed model cache directory under ~/.omp/cache/fastembed
+- Added `getFastembedCacheDir` to return the FastEmbed model cache directory under ~/.mop/cache/fastembed
 
 ### Fixed
 

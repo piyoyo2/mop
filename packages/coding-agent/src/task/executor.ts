@@ -535,7 +535,7 @@ export interface ExecutorOptions {
 	preloadedPreparedExtensions?: readonly PreparedExtension[];
 	/**
 	 * Parent's discovered custom-tool source paths. Forwarded to skip the
-	 * `.omp/tools/` FS scan in the subagent; the subagent then re-binds each
+	 * `.mop/tools/` FS scan in the subagent; the subagent then re-binds each
 	 * tool against its own `CustomToolAPI` (cwd, exec, pushPendingAction, UI).
 	 */
 	preloadedCustomToolPaths?: ToolPathWithSource[];

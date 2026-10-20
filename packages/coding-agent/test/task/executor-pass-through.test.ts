@@ -132,7 +132,7 @@ describe("runSubprocess parent-discovery pass-through (issue #2190)", () => {
 		const spy = vi.spyOn(sdkModule, "createAgentSession").mockResolvedValue(createSessionResult(session));
 
 		const rules: Rule[] = [{ name: "rule-a" } as unknown as Rule];
-		const preloadedExtensionPaths = ["/abs/parent/.omp/extensions/foo.ts"];
+		const preloadedExtensionPaths = ["/abs/parent/.mop/extensions/foo.ts"];
 		const preloadedPreparedExtensions: PreparedExtension[] = [
 			{
 				path: preloadedExtensionPaths[0]!,

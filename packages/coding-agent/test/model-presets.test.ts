@@ -74,8 +74,8 @@ describe("model presets", () => {
 		const dir = TempDir.createSync("@pi-model-presets-project-");
 		tempDirs.push(dir);
 		const projectDir = path.join(dir.path(), "project");
-		fs.mkdirSync(path.join(projectDir, ".omp"), { recursive: true });
-		if (options.project) fs.writeFileSync(path.join(projectDir, ".omp", "config.yml"), options.project);
+		fs.mkdirSync(path.join(projectDir, ".mop"), { recursive: true });
+		if (options.project) fs.writeFileSync(path.join(projectDir, ".mop", "config.yml"), options.project);
 		const configFiles: string[] = [];
 		if (options.overlay) {
 			const overlayPath = path.join(dir.path(), "overlay.yml");

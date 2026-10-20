@@ -12,7 +12,7 @@ describe("transient status classification", () => {
 	const overflowWithArtifactPointer =
 		'Summarization failed: 400 {"type":"error","error":{"type":"invalid_request_error",' +
 		'"message":"prompt is too long: 3030000 tokens > 1000000 maximum"}}\n' +
-		"raw-http-request=/home/u/.omp/logs/http-400-requests/1787022540720-3o503gxo48bvb.json";
+		"raw-http-request=/home/u/.mop/logs/http-400-requests/1787022540720-3o503gxo48bvb.json";
 
 	it("does not call a 400 transient because an artifact id embeds a status code", () => {
 		const id = AIError.classify(new Error(overflowWithArtifactPointer), "anthropic-messages");

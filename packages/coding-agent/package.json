@@ -15,7 +15,10 @@
 		"url": "https://github.com/can1357/oh-my-pi/issues"
 	},
 	"license": "MIT",
-	"author": { "name": "Stencil Labs, Inc.", "url": "https://stencil.so" },
+	"author": {
+		"name": "Stencil Labs, Inc.",
+		"url": "https://stencil.so"
+	},
 	"contributors": [
 		"Mario Zechner"
 	],
@@ -25,12 +28,14 @@
 		"directory": "packages/coding-agent"
 	},
 	"bin": {
-		"omp": "src/cli.ts"
+		"mop": "src/cli.ts"
 	},
 	"files": [
 		"src",
+		"skills",
 		"dist/cli.js",
 		"dist/docs-index.generated.txt",
+		"dist/skills-index.generated.txt",
 		"dist/CHANGELOG-*.md",
 		"dist/*.node",
 		"dist/*.json-*.zst",
@@ -531,6 +536,7 @@
 		"format-prompts": "bun scripts/format-prompts.ts",
 		"gen:tool-views": "bun --cwd=../collab-web run gen:tool-views",
 		"gen:bundle": "bun scripts/bundle-dist.ts",
+		"gen:skills": "bun scripts/generate-skills-index.ts",
 		"gen:rpc": "bun scripts/gen-rpc/index.ts",
 		"prepack": "bun run gen:tool-views && bun run gen:bundle",
 		"bench:guard": "bun scripts/bench-guard.ts"

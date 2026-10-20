@@ -390,11 +390,11 @@ describe("structured subagent primitive", () => {
 
 		try {
 			await Bun.write(
-				path.join(projectDir, ".omp", "config.yml"),
+				path.join(projectDir, ".mop", "config.yml"),
 				"task:\n  agentModelOverrides:\n    hot-worker: xai-oauth/grok-4.6:medium\n  enableEffort: false\nretry:\n  modelFallback: false\n",
 			);
 			await Bun.write(
-				path.join(projectDir, ".omp", "agents", "hot-worker.md"),
+				path.join(projectDir, ".mop", "agents", "hot-worker.md"),
 				"---\nname: hot-worker\ndescription: Newly added worker.\nmodel: openai/gpt-4o\n---\n\nInspect the assignment.\n",
 			);
 
@@ -444,7 +444,7 @@ describe("structured subagent primitive", () => {
 		const root = await fs.mkdtemp(path.join(os.tmpdir(), "omp-task-tier-reload-"));
 		const projectDir = path.join(root, "project");
 		const agentDir = path.join(root, "agent");
-		await fs.mkdir(path.join(projectDir, ".omp"), { recursive: true });
+		await fs.mkdir(path.join(projectDir, ".mop"), { recursive: true });
 		await fs.mkdir(agentDir, { recursive: true });
 		const liveSettings = await Settings.loadIsolated({ cwd: projectDir, agentDir });
 		const liveSession = session({ cwd: projectDir, settings: liveSettings });
@@ -1320,7 +1320,7 @@ describe("agent frontmatter structured opt-in", () => {
 		await fs.mkdir(home, { recursive: true });
 		restoreEnvValue("HOME", home);
 		vi.spyOn(os, "homedir").mockReturnValue(home);
-		setAgentDir(path.join(home, ".omp", "agent"));
+		setAgentDir(path.join(home, ".mop", "agent"));
 		AgentRegistry.resetGlobalForTests();
 		AgentLifecycleManager.resetGlobalForTests();
 		registerMockApi(MOCK_API_SOURCE);
@@ -1348,7 +1348,7 @@ describe("agent frontmatter structured opt-in", () => {
 			// Under the isolated HOME so project discovery stops before the developer's real ~/.omp.
 			const cwd = path.join(root, "home", "work");
 			await fs.mkdir(cwd, { recursive: true });
-			const agentsDir = path.join(root, "home", ".omp", "agent", "agents");
+			const agentsDir = path.join(root, "home", ".mop", "agent", "agents");
 			await Bun.write(path.join(agentsDir, "reporter.md"), agentFile("reporter", true));
 			await Bun.write(path.join(agentsDir, "plain.md"), agentFile("plain", false));
 

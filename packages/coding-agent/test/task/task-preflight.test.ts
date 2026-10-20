@@ -172,7 +172,7 @@ describe("task async preflight", () => {
 		const home = await fs.mkdtemp(path.join(os.tmpdir(), "omp-unknown-agent-"));
 		try {
 			const projectDir = path.join(home, "project");
-			await fs.mkdir(path.join(projectDir, ".omp", "agents"), { recursive: true });
+			await fs.mkdir(path.join(projectDir, ".mop", "agents"), { recursive: true });
 			vi.spyOn(os, "homedir").mockReturnValue(home);
 			const tool = await TaskTool.create(createSession({ manager: manager(), cwd: projectDir }));
 
@@ -184,7 +184,7 @@ describe("task async preflight", () => {
 
 			const text = textOf(result);
 			// shortenPath renders home paths as portable `~/…` on every platform.
-			expect(text).toContain("Searched: ~/project/.omp/agents");
+			expect(text).toContain("Searched: ~/project/.mop/agents");
 			expect(text).not.toContain(home);
 		} finally {
 			await fs.rm(home, { recursive: true, force: true });

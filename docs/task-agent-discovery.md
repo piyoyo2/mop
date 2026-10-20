@@ -50,11 +50,11 @@ Parsing comes from frontmatter via `parseAgentFields()` (`src/discovery/helpers.
 
 ## Role-backed custom agents
 
-OMP discovers user agents from `~/.omp/agent/agents/*.md` and project agents from `.omp/agents/*.md`.
+OMP discovers user agents from `~/.mop/agent/agents/*.md` and project agents from `.mop/agents/*.md`.
 
 Give the agent a role alias in frontmatter, then dispatch it by name. For model routing, task dispatch sets only `agent`; it does not set a worker model:
 
-`~/.omp/agent/agents/reviewer.md`:
+`~/.mop/agent/agents/reviewer.md`:
 
 ```md
 ---
@@ -66,7 +66,7 @@ model: "@review"
 Review the assigned change and report concrete findings.
 ```
 
-Set the role mapping in `~/.omp/agent/config.yml`:
+Set the role mapping in `~/.mop/agent/config.yml`:
 
 ```yaml
 modelRoles:
@@ -145,12 +145,12 @@ Because bundled parsing uses `level: "fatal"`, unrecoverable YAML errors or inva
 
 ## Filesystem and plugin discovery
 
-`discoverAgents(cwd, home, extensionRoots?)` (`src/task/discovery.ts`) merges agents from OMP-native roots, OMP extension packages, and Claude marketplace plugin roots before appending bundled definitions. Direct cross-harness roots such as `.claude/agents`, `.codex/agents`, and `.gemini/agents` are intentionally skipped — their frontmatter schema is not the OMP task-agent contract (`TASK_AGENT_CONFIG_SOURCE = ".omp"` filters the native config-dir lists).
+`discoverAgents(cwd, home, extensionRoots?)` (`src/task/discovery.ts`) merges agents from OMP-native roots, OMP extension packages, and Claude marketplace plugin roots before appending bundled definitions. Direct cross-harness roots such as `.claude/agents`, `.codex/agents`, and `.gemini/agents` are intentionally skipped — their frontmatter schema is not the OMP task-agent contract (`TASK_AGENT_CONFIG_SOURCE = ".mop"` filters the native config-dir lists).
 
 ### Discovery inputs and precedence
 
-1. Nearest project `.omp/agents` dir from `findAllNearestProjectConfigDirs("agents", cwd)` (first `.omp` hit only)
-2. User `.omp/agents` dir from `getConfigDirs("agents", { project: false })` (first `.omp` hit only)
+1. Nearest project `.mop/agents` dir from `findAllNearestProjectConfigDirs("agents", cwd)` (first `.mop` hit only)
+2. User `.mop/agents` dir from `getConfigDirs("agents", { project: false })` (first `.mop` hit only)
 3. `<extension-root>/agents` for every enabled OMP extension package returned by `listOmpExtensionRoots(...)`, in this order:
    - explicit CLI `--extension` / SDK `additionalExtensionPaths` directory roots
    - the session's effective `extensions:` array, in its configured order
@@ -173,7 +173,7 @@ Discovery uses first-wins dedup by exact `agent.name`:
 
 Implications:
 
-- Project `.omp` overrides user `.omp`.
+- Project `.mop` overrides user `.mop`.
 - Earlier extension roots override later extension roots, Claude marketplace plugins, and bundled agents.
 - Non-bundled agents override bundled agents with the same name.
 - Name matching is case-sensitive (`Task` and `task` are distinct).

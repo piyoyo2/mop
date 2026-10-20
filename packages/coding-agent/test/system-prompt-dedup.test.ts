@@ -71,7 +71,7 @@ describe("SYSTEM.md prompt assembly", () => {
 
 	it("renders SYSTEM.md exactly once when it is used as the custom base prompt", async () => {
 		const projectDir = path.join(tempDir, "project");
-		const systemDir = path.join(projectDir, ".omp");
+		const systemDir = path.join(projectDir, ".mop");
 		const systemPrompt = "You are the project SYSTEM prompt.";
 		fs.mkdirSync(systemDir, { recursive: true });
 		fs.writeFileSync(path.join(systemDir, "SYSTEM.md"), systemPrompt);
@@ -139,8 +139,8 @@ describe("SYSTEM.md prompt assembly", () => {
 	it("suppresses discovered SYSTEM.md while preserving the project footer", async () => {
 		const projectDir = path.join(tempDir, "project");
 		const appendPrompt = "Extra append instructions";
-		fs.mkdirSync(path.join(projectDir, ".omp"), { recursive: true });
-		fs.writeFileSync(path.join(projectDir, ".omp", "SYSTEM.md"), "Discovered project SYSTEM prompt");
+		fs.mkdirSync(path.join(projectDir, ".mop"), { recursive: true });
+		fs.writeFileSync(path.join(projectDir, ".mop", "SYSTEM.md"), "Discovered project SYSTEM prompt");
 
 		const { systemPrompt } = await buildSystemPrompt({
 			cwd: projectDir,
@@ -200,10 +200,10 @@ describe("SYSTEM.md prompt assembly", () => {
 
 	it("prefers project SYSTEM.md over user SYSTEM.md", async () => {
 		const projectDir = path.join(tempDir, "project");
-		fs.mkdirSync(path.join(projectDir, ".omp"), { recursive: true });
-		fs.mkdirSync(path.join(tempHomeDir, ".omp", "agent"), { recursive: true });
-		fs.writeFileSync(path.join(tempHomeDir, ".omp", "agent", "SYSTEM.md"), "User SYSTEM prompt");
-		fs.writeFileSync(path.join(projectDir, ".omp", "SYSTEM.md"), "Project SYSTEM prompt");
+		fs.mkdirSync(path.join(projectDir, ".mop"), { recursive: true });
+		fs.mkdirSync(path.join(tempHomeDir, ".mop", "agent"), { recursive: true });
+		fs.writeFileSync(path.join(tempHomeDir, ".mop", "agent", "SYSTEM.md"), "User SYSTEM prompt");
+		fs.writeFileSync(path.join(projectDir, ".mop", "SYSTEM.md"), "Project SYSTEM prompt");
 
 		await expect(loadSystemPromptFiles({ cwd: projectDir })).resolves.toBe("Project SYSTEM prompt");
 	});

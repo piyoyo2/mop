@@ -1,16 +1,16 @@
 # OMP Coding Agent Installer for Windows
-# Usage: irm https://omp.sh/install.ps1 | iex
+# Usage: irm https://mop.sh/install.ps1 | iex
 #
 # Or with options:
-#   & ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Source
-#   & ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Binary
-#   & ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Source -Ref v18.8.9
-#   & ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Source -Ref main
-#   & ([scriptblock]::Create((irm https://omp.sh/install.ps1))) -Binary -Ref v18.8.9
+#   & ([scriptblock]::Create((irm https://mop.sh/install.ps1))) -Source
+#   & ([scriptblock]::Create((irm https://mop.sh/install.ps1))) -Binary
+#   & ([scriptblock]::Create((irm https://mop.sh/install.ps1))) -Source -Ref v0.1.0
+#   & ([scriptblock]::Create((irm https://mop.sh/install.ps1))) -Source -Ref main
+#   & ([scriptblock]::Create((irm https://mop.sh/install.ps1))) -Binary -Ref v0.1.0
 #
 # -Ref takes any tag/commit/branch with -Source; binary installs take a release
 # tag (v<version>). Prebuilt binaries come from the build service
-# ($env:PI_BUILD_URL, default https://build.stencil.so) and are checked against
+# ($env:PI_RELEASES_URL / $env:PI_RELEASES_API_URL) and are checked against
 # its sha256 before install.
 
 param(
@@ -31,8 +31,10 @@ if ($PSVersionTable.PSVersion -lt [version]"5.1") {
 
 $Repo = "can1357/oh-my-pi"
 $Package = "@oh-my-pi/pi-coding-agent"
-$InstallDir = if ($env:PI_INSTALL_DIR) { $env:PI_INSTALL_DIR } else { "$env:LOCALAPPDATA\omp" }
-$BuildUrl = if ($env:PI_BUILD_URL) { $env:PI_BUILD_URL.TrimEnd("/") } else { "https://build.stencil.so" }
+$Repo = "soliloquy1/mop"
+$InstallDir = if ($env:PI_INSTALL_DIR) { $env:PI_INSTALL_DIR } else { "$env:LOCALAPPDATA\mop" }
+$ReleasesUrl = if ($env:PI_RELEASES_URL) { $env:PI_RELEASES_URL.TrimEnd("/") } else { "https://github.com/$Repo/releases" }
+$ReleasesApiUrl = if ($env:PI_RELEASES_API_URL) { $env:PI_RELEASES_API_URL.TrimEnd("/") } else { "https://api.github.com/repos/$Repo/releases" }
 # Windows PowerShell 5.1 (.NET Framework) does not reliably resolve
 # [System.Runtime.InteropServices.RuntimeInformation] without an
 # assembly-qualified name, while PowerShell 7+ (Core) loads that type from a
@@ -151,7 +153,7 @@ function Find-BashShell {
 
 function Configure-BashShell {
     try {
-        $settingsDir = Join-Path $env:USERPROFILE ".omp\agent"
+        $settingsDir = Join-Path $env:USERPROFILE ".mop\agent"
         $settingsFile = Join-Path $settingsDir "settings.json"
 
         # Check if settings.json already has a shellPath configured
@@ -227,7 +229,7 @@ function Install-ViaBun {
             throw "git is required for -Ref when installing from source"
         }
 
-        $tmpRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("omp-install-" + [System.Guid]::NewGuid().ToString("N"))
+        $tmpRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("mop-install-" + [System.Guid]::NewGuid().ToString("N"))
         New-Item -ItemType Directory -Force -Path $tmpRoot | Out-Null
 
         try {
@@ -279,11 +281,11 @@ function Install-ViaBun {
     }
 
     Write-Host ""
-    Write-Host "[OK] Installed omp via bun" -ForegroundColor Green
+    Write-Host "[OK] Installed mop via bun" -ForegroundColor Green
 
     Configure-BashShell
 
-    Write-Host "Run 'omp' to get started!"
+    Write-Host "Run 'mop' to get started!"
 }
 
 function Install-Binary {
@@ -291,37 +293,40 @@ function Install-Binary {
         if ($Ref -notmatch '^v(\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?)$') {
             throw "Binary installs take a release tag (v<version>) for -Ref, got: $Ref`nFor branch/commit installs, use -Source with -Ref."
         }
-        $RequestedVersion = $Matches[1]
-        Write-Host "Fetching omp $RequestedVersion..."
-        $ApiUrl = "$BuildUrl/api/products/omp/versions/$RequestedVersion/$BuildTarget"
+        $Version = $Matches[1]
     } else {
         Write-Host "Fetching latest release..."
-        $ApiUrl = "$BuildUrl/api/products/omp/latest/${BuildTarget}?channel=stable"
-    }
-    try {
-        $Answer = Invoke-RestMethod -Uri $ApiUrl -TimeoutSec 60
-    } catch {
-        throw "Failed to resolve an omp build for $BuildTarget from ${ApiUrl}: $_"
+        try {
+            $Answer = Invoke-RestMethod -Uri "$ReleasesApiUrl/latest" -TimeoutSec 60
+        } catch {
+            throw "Failed to resolve the latest mop release from $Repo: $_"
+        }
+        $Version = "$($Answer.tag_name)".TrimStart("v")
+        if (-not $Version) {
+            throw "Unexpected release answer from $Repo"
+        }
     }
 
-    $Version = $Answer.build.version
-    $BinaryName = $Answer.file.name
-    $ExpectedSha256 = "$($Answer.file.sha256)".ToLowerInvariant()
-    $DownloadUrl = $Answer.download
-    if (-not $Version -or -not $BinaryName -or -not $DownloadUrl -or $ExpectedSha256 -notmatch '^[0-9a-f]{64}$') {
-        throw "Unexpected answer from $ApiUrl"
-    }
-    Write-Host "Using version: $Version"
+    $BinaryName = "mop-$Version-$BuildTarget"
+    $DownloadUrl = "$ReleasesUrl/download/v$Version/$BinaryName"
+    $ShaUrl = "$DownloadUrl.sha256"
 
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 
     # Download next to the destination and move it into place only once the
-    # checksum matches, so a bad download never replaces a working omp.
+    # checksum matches, so a bad download never replaces a working mop.
+    Write-Host "Using version: $Version"
     Write-Host "Downloading $BinaryName..."
-    $OutPath = Join-Path $InstallDir "omp.exe"
-    $DownloadPath = Join-Path $InstallDir ".omp.download.exe"
+    $OutPath = Join-Path $InstallDir "mop.exe"
+    $DownloadPath = Join-Path $InstallDir ".mop.download.exe"
+    $ShaPath = Join-Path $InstallDir ".mop.sha256.exe"
     try {
         Invoke-WebRequest -Uri $DownloadUrl -OutFile $DownloadPath -TimeoutSec 900
+        Invoke-WebRequest -Uri $ShaUrl -OutFile $ShaPath -TimeoutSec 60
+        $ExpectedSha256 = ((Get-Content -LiteralPath $ShaPath -Raw) -split '\s+')[0].ToLowerInvariant()
+        if ($ExpectedSha256 -notmatch '^[0-9a-f]{64}$') {
+            throw "Unexpected checksum file at $ShaUrl"
+        }
         $ActualSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $DownloadPath).Hash.ToLowerInvariant()
         if ($ActualSha256 -ne $ExpectedSha256) {
             throw "Checksum mismatch for ${BinaryName}: expected $ExpectedSha256, got $ActualSha256"
@@ -329,10 +334,11 @@ function Install-Binary {
         Move-Item -Force -LiteralPath $DownloadPath -Destination $OutPath
     } finally {
         Remove-Item -Force -LiteralPath $DownloadPath -ErrorAction SilentlyContinue
+        Remove-Item -Force -LiteralPath $ShaPath -ErrorAction SilentlyContinue
     }
 
     Write-Host ""
-    Write-Host "[OK] Installed omp to $OutPath" -ForegroundColor Green
+    Write-Host "[OK] Installed mop to $OutPath" -ForegroundColor Green
 
     # Add to PATH if not already there
     $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -345,9 +351,9 @@ function Install-Binary {
     Configure-BashShell
 
     if ($needsRestart) {
-        Write-Host "Restart your terminal, then run 'omp' to get started!"
+        Write-Host "Restart your terminal, then run 'mop' to get started!"
     } else {
-        Write-Host "Run 'omp' to get started!"
+        Write-Host "Run 'mop' to get started!"
     }
 }
 

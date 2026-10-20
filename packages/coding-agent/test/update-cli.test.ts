@@ -130,7 +130,7 @@ afterEach(async () => {
 	await Promise.all(tempDirs.splice(0).map(dir => removeWithRetries(dir)));
 });
 const TEST_CONFIG: CliConfig = {
-	bin: "omp",
+	bin: "mop",
 	version: "0.0.0-test",
 	commands: new Map(),
 };
@@ -186,8 +186,8 @@ describe("parseReportedVersion", () => {
 		// Regression: dropping `-canary.1` made a correctly installed canary
 		// build look like a stale `X.Y.Z` launcher, triggering a needless
 		// binary repair.
-		expect(parseReportedVersion("omp/18.0.6-canary.1")).toBe("18.0.6-canary.1");
-		expect(parseReportedVersion("omp/18.0.5")).toBe("18.0.5");
+		expect(parseReportedVersion("mop/18.0.6-canary.1")).toBe("18.0.6-canary.1");
+		expect(parseReportedVersion("mop/18.0.5")).toBe("18.0.5");
 		expect(parseReportedVersion("not a version")).toBeUndefined();
 	});
 
@@ -200,7 +200,7 @@ describe("parseReportedVersion", () => {
 describe("update-cli install target detection", () => {
 	it("leaves Nix store installations under Nix management", () => {
 		const method = resolveUpdateMethodForTest(
-			"/nix/store/0123456789-omp-17.2.15/bin/omp",
+			"/nix/store/0123456789-omp-17.2.15/bin/mop",
 			"/nix/store/9876543210-bun-1.3.14/bin",
 		);
 
@@ -208,13 +208,13 @@ describe("update-cli install target detection", () => {
 	});
 
 	it("uses bun update when prioritized omp is inside bun global bin", () => {
-		const method = resolveUpdateMethodForTest("/Users/test/.bun/bin/omp", "/Users/test/.bun/bin");
+		const method = resolveUpdateMethodForTest("/Users/test/.bun/bin/mop", "/Users/test/.bun/bin");
 
 		expect(method).toBe("bun");
 	});
 
 	it("uses npm update when prioritized omp is inside an npm global bin", () => {
-		const method = resolveUpdateMethodForTest("/Users/test/.npm-global/bin/omp", undefined, {
+		const method = resolveUpdateMethodForTest("/Users/test/.npm-global/bin/mop", undefined, {
 			npmBinDir: "/Users/test/.npm-global/bin",
 		});
 
@@ -222,7 +222,7 @@ describe("update-cli install target detection", () => {
 	});
 
 	it("uses npm update for Windows npm command shims even when no package-manager bin dirs were detected", () => {
-		const method = resolveUpdateMethodForTest("C:\\Users\\test\\AppData\\Roaming\\npm\\omp.cmd", undefined);
+		const method = resolveUpdateMethodForTest("C:\\Users\\test\\AppData\\Roaming\\npm\\mop.cmd", undefined);
 
 		expect(method).toBe("npm");
 	});
@@ -234,9 +234,9 @@ describe("update-cli install target detection", () => {
 		// to overwrite the existing executable. POSIX layout: on Windows an
 		// extensionless launcher is npm's sh shim (covered by the win32 cases).
 		const method = withPlatform("linux", () =>
-			resolveUpdateMethodForTest("/home/u/.local/bin/omp", undefined, {
+			resolveUpdateMethodForTest("/home/u/.local/bin/mop", undefined, {
 				npmBinDir: "/home/u/.local/bin",
-				ompIsRegularFile: true,
+				binaryIsRegularFile: true,
 			}),
 		);
 
@@ -245,8 +245,8 @@ describe("update-cli install target detection", () => {
 
 	it("uses binary update when a plain file in the bun global bin dir is the standalone binary", () => {
 		const method = withPlatform("linux", () =>
-			resolveUpdateMethodForTest("/home/u/.local/bin/omp", "/home/u/.local/bin", {
-				ompIsRegularFile: true,
+			resolveUpdateMethodForTest("/home/u/.local/bin/mop", "/home/u/.local/bin", {
+				binaryIsRegularFile: true,
 			}),
 		);
 
@@ -260,8 +260,8 @@ describe("update-cli install target detection", () => {
 		// only a bun-managed launcher has. Paths use forward slashes so the
 		// lexical containment check works on the POSIX host running this suite.
 		const method = withPlatform("win32", () =>
-			resolveUpdateMethodForTest("C:/Users/test/.bun/bin/omp.exe", "C:/Users/test/.bun/bin", {
-				ompIsRegularFile: true,
+			resolveUpdateMethodForTest("C:/Users/test/.bun/bin/mop.exe", "C:/Users/test/.bun/bin", {
+				binaryIsRegularFile: true,
 				bunShimMarker: true,
 			}),
 		);
@@ -276,8 +276,8 @@ describe("update-cli install target detection", () => {
 		// running .exe — bun tolerates that EBUSY — so the install stayed pinned
 		// to the old version with no way forward.
 		const method = withPlatform("win32", () =>
-			resolveUpdateMethodForTest("C:/Users/test/.bun/bin/omp.exe", "C:/Users/test/.bun/bin", {
-				ompIsRegularFile: true,
+			resolveUpdateMethodForTest("C:/Users/test/.bun/bin/mop.exe", "C:/Users/test/.bun/bin", {
+				binaryIsRegularFile: true,
 			}),
 		);
 
@@ -285,9 +285,9 @@ describe("update-cli install target detection", () => {
 	});
 
 	it("still uses npm update when the npm global bin entry is a package-manager symlink, not a plain file", () => {
-		const method = resolveUpdateMethodForTest("/home/u/.local/bin/omp", undefined, {
+		const method = resolveUpdateMethodForTest("/home/u/.local/bin/mop", undefined, {
 			npmBinDir: "/home/u/.local/bin",
-			ompIsRegularFile: false,
+			binaryIsRegularFile: false,
 		});
 
 		expect(method).toBe("npm");
@@ -296,8 +296,8 @@ describe("update-cli install target detection", () => {
 	it("updates the standalone binary behind a foreign npm-bin alias without replacing the alias", async () => {
 		const dir = await makeTempDir();
 		const npmBinDir = path.join(dir, ".npm-global", "bin");
-		const standalonePath = path.join(dir, ".local", "bin", "omp");
-		const aliasPath = path.join(npmBinDir, "omp");
+		const standalonePath = path.join(dir, ".local", "bin", "mop");
+		const aliasPath = path.join(npmBinDir, "mop");
 		await fs.mkdir(npmBinDir, { recursive: true });
 		await Bun.write(standalonePath, "binary");
 		await fs.symlink(standalonePath, aliasPath);
@@ -323,7 +323,7 @@ describe("update-cli install target detection", () => {
 		const packagePath = path.join(nodeModulesDir, "@oh-my-pi", "pi-coding-agent");
 		const checkoutPath = path.join(dir, "checkout");
 		const checkoutCli = path.join(checkoutPath, "dist", "cli.js");
-		const aliasPath = path.join(npmBinDir, "omp");
+		const aliasPath = path.join(npmBinDir, "mop");
 		await fs.mkdir(npmBinDir, { recursive: true });
 		await fs.mkdir(path.dirname(packagePath), { recursive: true });
 		await Bun.write(checkoutCli, "linked checkout");
@@ -344,8 +344,8 @@ describe("update-cli install target detection", () => {
 		const dir = await makeTempDir();
 		const bunDir = path.join(dir, ".bun");
 		const bunBinDir = path.join(bunDir, "bin");
-		const standalonePath = path.join(bunDir, "custom", "omp");
-		const aliasPath = path.join(bunBinDir, "omp");
+		const standalonePath = path.join(bunDir, "custom", "mop");
+		const aliasPath = path.join(bunBinDir, "mop");
 		await fs.mkdir(bunBinDir, { recursive: true });
 		await Bun.write(standalonePath, "binary");
 		await fs.symlink(path.relative(bunBinDir, standalonePath), aliasPath);
@@ -369,10 +369,10 @@ describe("update-cli install target detection", () => {
 		// beside a root-owned symlink (EACCES) or replaces it with a split-brain
 		// copy that shadows the shared install (#8732).
 		const dir = await makeTempDir();
-		const sharedBinDir = path.join(dir, "opt", "omp", "bin");
-		const standalonePath = path.join(sharedBinDir, "omp");
+		const sharedBinDir = path.join(dir, "opt", "mop", "bin");
+		const standalonePath = path.join(sharedBinDir, "mop");
 		const launcherDir = path.join(dir, "usr", "local", "bin");
-		const launcherPath = path.join(launcherDir, "omp");
+		const launcherPath = path.join(launcherDir, "mop");
 		await fs.mkdir(sharedBinDir, { recursive: true });
 		await fs.mkdir(launcherDir, { recursive: true });
 		await Bun.write(standalonePath, "binary");
@@ -396,7 +396,7 @@ describe("update-cli install target detection", () => {
 		async () => {
 			const dir = await makeTempDir();
 			const dispatcherPath = path.join(dir, "launch");
-			const aliasPath = path.join(dir, "omp");
+			const aliasPath = path.join(dir, "mop");
 			const dispatcher = "#!/bin/sh\necho dispatcher\n";
 			await Bun.write(dispatcherPath, dispatcher);
 			await fs.chmod(dispatcherPath, 0o755);
@@ -424,7 +424,7 @@ describe("update-cli install target detection", () => {
 		async () => {
 			const dir = await makeTempDir();
 			const foreignPath = path.join(dir, "foreign");
-			const aliasPath = path.join(dir, "omp");
+			const aliasPath = path.join(dir, "mop");
 			await fs.copyFile(process.execPath, foreignPath);
 			await fs.chmod(foreignPath, 0o755);
 			await fs.symlink(foreignPath, aliasPath);
@@ -451,8 +451,8 @@ describe("update-cli install target detection", () => {
 		const dir = await makeTempDir();
 		const npmPrefix = path.join(dir, ".npm-global");
 		const { binDir: npmBinDir, nodeModulesDir } = npmGlobalLayout(npmPrefix);
-		const managedBinary = path.join(nodeModulesDir, "@oh-my-pi", "pi-coding-agent", "omp");
-		const aliasPath = path.join(npmBinDir, "omp");
+		const managedBinary = path.join(nodeModulesDir, "@oh-my-pi", "pi-coding-agent", "mop");
+		const aliasPath = path.join(npmBinDir, "mop");
 		await fs.mkdir(npmBinDir, { recursive: true });
 		await fs.mkdir(path.dirname(managedBinary), { recursive: true });
 		await Bun.write(managedBinary, "binary");
@@ -478,7 +478,7 @@ describe("update-cli install target detection", () => {
 		const packagePath = path.join(bunGlobalDir, "node_modules", "@oh-my-pi", "pi-coding-agent");
 		const checkoutPath = path.join(dir, "checkout");
 		const checkoutCli = path.join(checkoutPath, "dist", "cli.js");
-		const aliasPath = path.join(bunBinDir, "omp");
+		const aliasPath = path.join(bunBinDir, "mop");
 		await fs.mkdir(bunBinDir, { recursive: true });
 		await fs.mkdir(path.dirname(packagePath), { recursive: true });
 		await Bun.write(checkoutCli, "linked checkout");
@@ -496,27 +496,27 @@ describe("update-cli install target detection", () => {
 	});
 
 	it("uses binary update when prioritized omp is outside bun global bin", () => {
-		const method = resolveUpdateMethodForTest("/Users/test/.local/bin/omp", "/Users/test/.bun/bin");
+		const method = resolveUpdateMethodForTest("/Users/test/.local/bin/mop", "/Users/test/.bun/bin");
 
 		expect(method).toBe("binary");
 	});
 
 	it("uses binary update when bun global bin cannot be resolved", () => {
-		const method = resolveUpdateMethodForTest("/Users/test/.local/bin/omp", undefined);
+		const method = resolveUpdateMethodForTest("/Users/test/.local/bin/mop", undefined);
 
 		expect(method).toBe("binary");
 	});
 
 	it("uses Homebrew update when prioritized omp resolves into the Homebrew formula", async () => {
 		const dir = await makeTempDir();
-		const prefix = path.join(dir, "opt", "omp");
+		const prefix = path.join(dir, "opt", "mop");
 		const linkedBin = path.join(dir, "bin");
 		await fs.mkdir(path.join(prefix, "bin"), { recursive: true });
 		await fs.mkdir(linkedBin, { recursive: true });
-		await Bun.write(path.join(prefix, "bin", "omp"), "binary");
-		await fs.symlink(path.join(prefix, "bin", "omp"), path.join(linkedBin, "omp"));
+		await Bun.write(path.join(prefix, "bin", "mop"), "binary");
+		await fs.symlink(path.join(prefix, "bin", "mop"), path.join(linkedBin, "mop"));
 
-		const method = resolveUpdateMethodForTest(path.join(linkedBin, "omp"), "/Users/test/.bun/bin", {
+		const method = resolveUpdateMethodForTest(path.join(linkedBin, "mop"), "/Users/test/.bun/bin", {
 			homebrewPrefix: prefix,
 		});
 
@@ -525,7 +525,7 @@ describe("update-cli install target detection", () => {
 
 	it("uses mise update when prioritized omp is in an active mise bin path", () => {
 		const method = resolveUpdateMethodForTest(
-			"/Users/test/.local/share/mise/installs/github-can1357-oh-my-pi/latest/bin/omp",
+			"/Users/test/.local/share/mise/installs/github-can1357-oh-my-pi/latest/bin/mop",
 			undefined,
 			{
 				miseBinDirs: ["/Users/test/.local/share/mise/installs/github-can1357-oh-my-pi/latest/bin"],
@@ -536,7 +536,7 @@ describe("update-cli install target detection", () => {
 	});
 
 	it("uses mise update when prioritized omp is a mise shim", () => {
-		const method = resolveUpdateMethodForTest("/Users/test/.local/share/mise/shims/omp", undefined, {
+		const method = resolveUpdateMethodForTest("/Users/test/.local/share/mise/shims/mop", undefined, {
 			miseDataDir: "/Users/test/.local/share/mise",
 		});
 
@@ -546,18 +546,18 @@ describe("update-cli install target detection", () => {
 
 describe("update-cli package manager commands", () => {
 	it("targets the Homebrew tap formula and switches to reinstall for forced updates", () => {
-		expect(buildHomebrewUpdateArgs(false)).toEqual(["upgrade", "can1357/tap/omp"]);
-		expect(buildHomebrewUpdateArgs(true)).toEqual(["reinstall", "can1357/tap/omp"]);
+		expect(buildHomebrewUpdateArgs(false)).toEqual(["upgrade", "soliloquy1/tap/mop"]);
+		expect(buildHomebrewUpdateArgs(true)).toEqual(["reinstall", "soliloquy1/tap/mop"]);
 	});
 
 	it("targets the mise GitHub backend and overrides release-age settings for attended updates", () => {
-		expect(buildMiseUpgradeArgs()).toEqual(["upgrade", "github:can1357/oh-my-pi", "--bump", "--before", "0s"]);
-		expect(buildMiseUpgradeArgs(false)).toEqual(["upgrade", "github:can1357/oh-my-pi", "--bump"]);
+		expect(buildMiseUpgradeArgs()).toEqual(["upgrade", "github:soliloquy1/mop", "--bump", "--before", "0s"]);
+		expect(buildMiseUpgradeArgs(false)).toEqual(["upgrade", "github:soliloquy1/mop", "--bump"]);
 		expect(buildMiseUpdateEnv({ PATH: "/bin", MISE_MINIMUM_RELEASE_AGE: "24h" })).toEqual({
 			PATH: "/bin",
 			MISE_MINIMUM_RELEASE_AGE: "0s",
 		});
-		expect(buildMiseForceInstallArgs("15.10.5")).toEqual(["install", "--force", "github:can1357/oh-my-pi@15.10.5"]);
+		expect(buildMiseForceInstallArgs("15.10.5")).toEqual(["install", "--force", "github:soliloquy1/mop@15.10.5"]);
 	});
 
 	it.skipIf(!miseBinary)("overrides per-tool release age during actual mise upgrade resolution", async () => {
@@ -581,7 +581,7 @@ describe("update-cli package manager commands", () => {
 			await Bun.write(
 				path.join(root, "mise.toml"),
 				`[tools]
-"github:can1357/oh-my-pi" = { version = "1", minimum_release_age = "999y", api_url = "${server.url}" }
+"github:soliloquy1/mop" = { version = "1", minimum_release_age = "999y", api_url = "${server.url}" }
 `,
 			);
 			const env = {
@@ -612,7 +612,7 @@ describe("update-cli package manager commands", () => {
 				return stdout + stderr;
 			};
 
-			const blocked = await run(["upgrade", "github:can1357/oh-my-pi", "--bump", "--dry-run"]);
+			const blocked = await run(["upgrade", "github:soliloquy1/mop", "--bump", "--dry-run"]);
 			expect(blocked).not.toContain("Would install github:can1357/oh-my-pi@2.0.0");
 
 			const allowed = await run([...buildMiseUpgradeArgs(), "--dry-run"]);
@@ -627,9 +627,9 @@ describe("update-cli package manager commands", () => {
 
 		expect(args.slice(0, 2)).toEqual(["install", "-g"]);
 		expect(args).toContain("--registry=https://registry.npmjs.org/");
-		expect(args).toContain("@oh-my-pi/pi-coding-agent@16.3.15");
-		expect(args).toContain("@oh-my-pi/pi-natives@16.3.15");
-		expect(args).toContain("@oh-my-pi/pi-natives-win32-x64@16.3.15");
+		expect(args).toContain("@mop/pi-coding-agent@16.3.15");
+		expect(args).toContain("@mop/pi-natives@16.3.15");
+		expect(args).toContain("@mop/pi-natives-win32-x64@16.3.15");
 	});
 
 	it("passes --minimum-release-age=0 to bun installs unless the installed bun predates the flag", () => {
@@ -638,11 +638,11 @@ describe("update-cli package manager commands", () => {
 		const legacy = buildBunInstallArgs(
 			"16.3.15",
 			"linux-x64",
-			{ pkg: "@oh-my-pi/pi-coding-agent", natives: "@oh-my-pi/pi-natives" },
+			{ pkg: "@mop/pi-coding-agent", natives: "@mop/pi-natives" },
 			{ supportsReleaseAgeOverride: false },
 		);
 		expect(legacy).not.toContain("--minimum-release-age=0");
-		expect(legacy).toContain("@oh-my-pi/pi-coding-agent@16.3.15");
+		expect(legacy).toContain("@mop/pi-coding-agent@16.3.15");
 	});
 
 	it("overrides ambient npm release-age settings with the same key, never with before", () => {
@@ -743,55 +743,52 @@ describe("update-cli package manager commands", () => {
 
 describe("update-cli npm rename contract", () => {
 	it("parses a well-formed omp.rename pointer and rejects malformed ones", () => {
-		expect(resolveReleaseRename({ omp: { rename: { package: "@new/omp", natives: "@new/natives" } } })).toEqual({
-			pkg: "@new/omp",
+		expect(resolveReleaseRename({ mop: { rename: { package: "@new/mop", natives: "@new/natives" } } })).toEqual({
+			pkg: "@new/mop",
 			natives: "@new/natives",
 		});
-		expect(resolveReleaseRename({ omp: { rename: { package: "@new/omp" } } })).toEqual({
-			pkg: "@new/omp",
+		expect(resolveReleaseRename({ mop: { rename: { package: "@new/mop" } } })).toEqual({
+			pkg: "@new/mop",
 			natives: undefined,
 		});
-		expect(resolveReleaseRename({ omp: { rename: { package: "" } } })).toBeUndefined();
-		expect(resolveReleaseRename({ omp: { rename: "@new/omp" } })).toBeUndefined();
-		expect(resolveReleaseRename({ omp: {} })).toBeUndefined();
+		expect(resolveReleaseRename({ mop: { rename: { package: "" } } })).toBeUndefined();
+		expect(resolveReleaseRename({ mop: { rename: "@new/mop" } })).toBeUndefined();
+		expect(resolveReleaseRename({ mop: {} })).toBeUndefined();
 		expect(resolveReleaseRename(undefined)).toBeUndefined();
 	});
 
 	it("installs renamed package names in lock-step, with no old-name leftovers in the argv", () => {
-		const packages = { pkg: "@new/omp", natives: "@new/natives" };
+		const packages = { pkg: "@new/mop", natives: "@new/natives" };
 
 		const bunArgs = buildBunInstallArgs("17.0.0", "linux-x64", packages);
-		expect(bunArgs).toContain("@new/omp@17.0.0");
+		expect(bunArgs).toContain("@new/mop@17.0.0");
 		expect(bunArgs).toContain("@new/natives@17.0.0");
 		expect(bunArgs).toContain("@new/natives-linux-x64@17.0.0");
 		expect(bunArgs.some(arg => arg.startsWith("@oh-my-pi/"))).toBe(false);
 
-		expect(buildNpmInstallArgs("17.0.0", "linux-x64", packages)).toContain("@new/omp@17.0.0");
+		expect(buildNpmInstallArgs("17.0.0", "linux-x64", packages)).toContain("@new/mop@17.0.0");
 	});
 
 	it("adds --force to npm argv only for rename migrations so the old package's bin can be clobbered", () => {
-		const packages = { pkg: "@new/omp", natives: "@new/natives" };
+		const packages = { pkg: "@new/mop", natives: "@new/natives" };
 		expect(buildNpmInstallArgs("17.0.0", "linux-x64", packages, { force: true })).toContain("--force");
 		expect(buildNpmInstallArgs("16.3.15", "win32-x64")).not.toContain("--force");
 	});
 
 	it("removes the old agent package and its natives companions when both names moved", () => {
-		const packages = { pkg: "@new/omp", natives: "@new/natives" };
+		const packages = { pkg: "@new/mop", natives: "@new/natives" };
 		expect(buildRenameCleanupPackages(packages, "darwin-arm64")).toEqual([
-			"@oh-my-pi/pi-coding-agent",
-			"@oh-my-pi/pi-natives",
-			"@oh-my-pi/pi-natives-darwin-arm64",
+			"@mop/pi-coding-agent",
+			"@mop/pi-natives",
+			"@mop/pi-natives-darwin-arm64",
 		]);
-		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual([
-			"@oh-my-pi/pi-coding-agent",
-			"@oh-my-pi/pi-natives",
-		]);
+		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual(["@mop/pi-coding-agent", "@mop/pi-natives"]);
 	});
 
 	it("keeps the natives packages on an agent-only rename so cleanup cannot strip the addon the new install pinned", () => {
-		const packages = { pkg: "@new/omp", natives: "@oh-my-pi/pi-natives" };
-		expect(buildRenameCleanupPackages(packages, "darwin-arm64")).toEqual(["@oh-my-pi/pi-coding-agent"]);
-		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual(["@oh-my-pi/pi-coding-agent"]);
+		const packages = { pkg: "@new/mop", natives: "@mop/pi-natives" };
+		expect(buildRenameCleanupPackages(packages, "darwin-arm64")).toEqual(["@mop/pi-coding-agent"]);
+		expect(buildRenameCleanupPackages(packages, "linux-arm")).toEqual(["@mop/pi-coding-agent"]);
 	});
 });
 
@@ -799,7 +796,7 @@ describe("migrateRenamedInstall transaction", () => {
 	const release: ReleaseInfo = {
 		tag: "v999.1.0",
 		version: "999.1.0",
-		packages: { pkg: "@new/omp", natives: "@new/natives" },
+		packages: { pkg: "@new/mop", natives: "@new/natives" },
 		registry: "https://registry.npmjs.org/",
 	};
 
@@ -824,8 +821,8 @@ describe("migrateRenamedInstall transaction", () => {
 				async verify() {
 					calls.push("verify");
 					return script.verify[verifies++]
-						? { ok: true, actual: "999.1.0", path: "/bin/omp" }
-						: { ok: false, path: "/bin/omp" };
+						? { ok: true, actual: "999.1.0", path: "/bin/mop" }
+						: { ok: false, path: "/bin/mop" };
 				},
 			},
 		};
@@ -872,7 +869,7 @@ describe("migrateRenamedInstall transaction", () => {
 		const { steps, calls } = scriptedSteps({ install: [0, 0], verify: [false, false] });
 
 		await withPlatformAsync("linux", async () => {
-			await expect(migrateRenamedInstall(release, steps)).rejects.toThrow("curl -fsSL https://omp.sh/install");
+			await expect(migrateRenamedInstall(release, steps)).rejects.toThrow("curl -fsSL https://mop.sh/install");
 		});
 		expect(calls).toEqual(["install", "removeOld", "verify", "install", "verify"]);
 	});
@@ -885,7 +882,7 @@ describe("migrateRenamedInstall transaction", () => {
 		try {
 			const { steps } = scriptedSteps({ install: [0, 0], verify: [false, false] });
 			const promise = migrateRenamedInstall(release, steps);
-			await expect(promise).rejects.toThrow("irm https://omp.sh/install.ps1");
+			await expect(promise).rejects.toThrow("irm https://mop.sh/install.ps1");
 			await expect(promise).rejects.not.toThrow("| sh");
 		} finally {
 			Object.defineProperty(process, "platform", platformDescriptor);
@@ -910,21 +907,21 @@ describe("update-cli bun install command", () => {
 			"--no-cache",
 			"--minimum-release-age=0",
 			"--registry=https://registry.npmjs.org/",
-			"@oh-my-pi/pi-coding-agent@15.7.6",
+			"@mop/pi-coding-agent@15.7.6",
 		]);
 	});
 
 	it("pins the native addon core and the platform-specific leaf to the same version so the loader sentinel cannot drift on supported tags", () => {
 		// Regression: bun install -g <pkg>@<v> would update only the top-level
-		// package, leaving @oh-my-pi/pi-natives and @oh-my-pi/pi-natives-<tag>
+		// package, leaving @mop/pi-natives and @mop/pi-natives-<tag>
 		// at their previous version. The next launch then loaded a stale .node
 		// file and aborted at validateLoadedBindings with `The .node file on
 		// disk is from a different release than this loader`. See
 		// https://github.com/can1357/oh-my-pi/issues/1824.
 		for (const tag of ["linux-x64", "linux-arm64", "darwin-x64", "darwin-arm64", "win32-x64", "win32-arm64"]) {
 			const args = buildBunInstallArgs("15.9.0", tag);
-			expect(args).toContain("@oh-my-pi/pi-natives@15.9.0");
-			expect(args).toContain(`@oh-my-pi/pi-natives-${tag}@15.9.0`);
+			expect(args).toContain("@mop/pi-natives@15.9.0");
+			expect(args).toContain(`@mop/pi-natives-${tag}@15.9.0`);
 		}
 	});
 
@@ -935,8 +932,8 @@ describe("update-cli bun install command", () => {
 		// pipeline doesn't publish, otherwise bun aborts with EBADPLATFORM
 		// and hides the real diagnostic from `loadNative`'s aggregated error.
 		const args = buildBunInstallArgs("15.9.0", "linux-arm");
-		expect(args).toContain("@oh-my-pi/pi-natives@15.9.0");
-		expect(args.some(arg => arg.startsWith("@oh-my-pi/pi-natives-"))).toBe(false);
+		expect(args).toContain("@mop/pi-natives@15.9.0");
+		expect(args.some(arg => arg.startsWith("@mop/pi-natives-"))).toBe(false);
 	});
 
 	it("derives global node_modules from supported Bun locations with the explicit global directory taking precedence", () => {
@@ -1177,8 +1174,8 @@ describe("update-cli release binary integrity", () => {
 	it("rejects an altered whole-file download and leaves the installed binary in place", async () => {
 		const dir = await makeTempDir();
 		const targetPath = path.join(dir, binaryName);
-		const installed = "#!/bin/sh\necho omp/17.0.8\n";
-		const altered = "#!/bin/sh\necho omp/17.1.2\n";
+		const installed = "#!/bin/sh\necho mop/17.0.8\n";
+		const altered = "#!/bin/sh\necho mop/17.1.2\n";
 		await Bun.write(targetPath, installed);
 		await fs.chmod(targetPath, 0o755);
 		vi.spyOn(console, "log").mockImplementation(() => {});
@@ -1195,8 +1192,8 @@ describe("update-cli release binary integrity", () => {
 });
 
 describe("update-cli build patches", () => {
-	const installed = "installed omp 18.8.8";
-	const next = "omp 18.8.9, rebuilt from the patch";
+	const installed = "installed mop 18.8.8";
+	const next = "mop 18.8.9, rebuilt from the patch";
 	const patchBytes = "HDIFFSF20 patch from 18.8.8 to 18.8.9";
 	const patchUrl = "https://r2.test/patches/18.8.8-18.8.9";
 
@@ -1221,7 +1218,7 @@ describe("update-cli build patches", () => {
 	): Promise<{ dir: string; targetPath: string; requested: string[] }> {
 		vi.spyOn(console, "log").mockImplementation(() => {});
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
+		const targetPath = path.join(dir, "mop");
 		await Bun.write(targetPath, installed);
 		const requested: string[] = [];
 		const fetchImpl = async (input: string | URL | Request): Promise<Response> => {
@@ -1297,7 +1294,7 @@ describe("update-cli build patches", () => {
 describe("update-cli binary replacement", () => {
 	it("restores the previous binary when the replacement fails verification", async () => {
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
+		const targetPath = path.join(dir, "mop");
 		const tempPath = `${targetPath}.new`;
 		const backupPath = `${targetPath}.bak`;
 		await Bun.write(targetPath, "old binary");
@@ -1311,7 +1308,7 @@ describe("update-cli binary replacement", () => {
 				expectedVersion: "15.1.8",
 				verifyInstalledVersion: async () => ({ ok: false, path: targetPath }),
 			}),
-		).rejects.toThrow("restored previous omp binary");
+		).rejects.toThrow("restored previous mop binary");
 
 		expect(await Bun.file(targetPath).text()).toBe("old binary");
 		expect(await Bun.file(tempPath).exists()).toBe(false);
@@ -1320,7 +1317,7 @@ describe("update-cli binary replacement", () => {
 
 	it("keeps the replacement only after it reports the expected version", async () => {
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
+		const targetPath = path.join(dir, "mop");
 		const tempPath = `${targetPath}.new`;
 		const backupPath = `${targetPath}.bak`;
 		await Bun.write(targetPath, "old binary");
@@ -1343,7 +1340,7 @@ describe("update-cli binary replacement", () => {
 		// is nothing to move aside, so the swap must still land instead of
 		// aborting on ENOENT and leaving the user without a launcher.
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
+		const targetPath = path.join(dir, "mop");
 		const tempPath = `${targetPath}.new`;
 		const backupPath = `${targetPath}.bak`;
 		await Bun.write(tempPath, "new binary");
@@ -1368,7 +1365,7 @@ describe("update-cli binary replacement on locked backups", () => {
 		// the running process image, so unlinking it throws EPERM. That cleanup
 		// failure must not turn a verified swap into "Update failed" (issue #845).
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp.exe");
+		const targetPath = path.join(dir, "mop.exe");
 		const tempPath = `${targetPath}.new`;
 		const backupPath = `${targetPath}.1700000000000.4242.bak`;
 		await Bun.write(targetPath, "old binary");
@@ -1407,7 +1404,7 @@ describe("update-cli binary replacement on locked backups", () => {
 describe("update-cli stale update artifact sweep", () => {
 	it("reclaims timestamped and legacy backups and orphaned temps while sparing in-progress temps and unrelated files", async () => {
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp.exe");
+		const targetPath = path.join(dir, "mop.exe");
 		await Bun.write(targetPath, "current binary");
 		await Bun.write(`${targetPath}.bak`, "legacy backup");
 		await Bun.write(`${targetPath}.1700000000000.4242.bak`, "timestamped backup");
@@ -1460,7 +1457,7 @@ describe.skipIf(process.platform !== "darwin")("update-cli macOS live backup ima
 	// macOS when executed from a new path, so they cannot serve here.)
 	it("retains a backup whose image a live process runs across cleanup and sweep, then reclaims it after the process exits", async () => {
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
+		const targetPath = path.join(dir, "mop");
 		await fs.copyFile(process.execPath, targetPath);
 		const live = Bun.spawn([targetPath, "-e", "await Bun.sleep(30000)"], { stdout: "ignore", stderr: "ignore" });
 		try {
@@ -1518,17 +1515,17 @@ describe.skipIf(process.platform !== "darwin")("update-cli macOS live backup ima
 
 describe("update-cli binary-only release gating", () => {
 	it("honors an explicit omp.dist field from the registry manifest", () => {
-		expect(resolveReleaseDist({ omp: { dist: "binary" } })).toBe("binary");
-		expect(resolveReleaseDist({ omp: { dist: "npm" } })).toBe("npm");
+		expect(resolveReleaseDist({ mop: { dist: "binary" } })).toBe("binary");
+		expect(resolveReleaseDist({ mop: { dist: "npm" } })).toBe("npm");
 	});
 
 	it("treats unknown dist values as binary-only", () => {
-		expect(resolveReleaseDist({ omp: { dist: "cargo" } })).toBe("binary");
+		expect(resolveReleaseDist({ mop: { dist: "cargo" } })).toBe("binary");
 	});
 
 	it("returns undefined when the manifest carries no dist field", () => {
 		expect(resolveReleaseDist({ version: "1.2.3" })).toBeUndefined();
-		expect(resolveReleaseDist({ omp: {} })).toBeUndefined();
+		expect(resolveReleaseDist({ mop: {} })).toBeUndefined();
 		expect(resolveReleaseDist(undefined)).toBeUndefined();
 	});
 
@@ -1561,9 +1558,9 @@ describe("update-cli script-shim takeover", () => {
 	}
 
 	const shims: Record<string, string> = {
-		omp: "#!/bin/sh\nnode omp.js\n",
-		"omp.cmd": "@node omp.js %*\n",
-		"omp.ps1": "node omp.js @args\n",
+		mop: "#!/bin/sh\nnode mop.js\n",
+		"mop.cmd": "@node mop.js %*\n",
+		"mop.ps1": "node mop.js @args\n",
 	};
 
 	async function writeShims(dir: string): Promise<void> {
@@ -1574,7 +1571,7 @@ describe("update-cli script-shim takeover", () => {
 
 	/**
 	 * The fake release binaries are `#!/bin/sh` scripts, which Windows cannot
-	 * launch as `omp.exe`. There, "run" the explicit path the takeover verifies
+	 * launch as `mop.exe`. There, "run" the explicit path the takeover verifies
 	 * by reading the version the script echoes; POSIX hosts execute it for real.
 	 */
 	const verifyBinary =
@@ -1586,19 +1583,19 @@ describe("update-cli script-shim takeover", () => {
 				}
 			: undefined;
 
-	it("installs omp.exe beside the shims and retires them", async () => {
+	it("installs mop.exe beside the shims and retires them", async () => {
 		const dir = await makeTempDir();
 		await writeShims(dir);
 		// Real executable, no injected verifier: the takeover must verify the
 		// exe by explicit path — $which cached the shim path before it was
 		// renamed away, so a PATH re-resolution would fail here.
-		const exe = `#!/bin/sh\necho omp/${version}\n`;
+		const exe = `#!/bin/sh\necho mop/${version}\n`;
 
 		const { build, fetchImpl } = offer(exe);
 
-		await updateViaShimTakeover(path.join(dir, "omp.cmd"), build, { fetchImpl, verifyBinary });
+		await updateViaShimTakeover(path.join(dir, "mop.cmd"), build, { fetchImpl, verifyBinary });
 
-		expect(await Bun.file(path.join(dir, "omp.exe")).text()).toBe(exe);
+		expect(await Bun.file(path.join(dir, "mop.exe")).text()).toBe(exe);
 		for (const name in shims) {
 			expect(await Bun.file(path.join(dir, name)).exists()).toBe(false);
 		}
@@ -1608,15 +1605,15 @@ describe("update-cli script-shim takeover", () => {
 
 	it("drops bun's launcher metadata when the standalone binary takes the .exe over", async () => {
 		// After the takeover the launcher is no longer bun-managed. A leftover
-		// `omp.bunx` would keep classifying the install as bun-managed and send
+		// `mop.bunx` would keep classifying the install as bun-managed and send
 		// the next update through `bun install -g`, which cannot overwrite the
 		// running `.exe` and would pin the install to the old version.
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp.exe");
-		const marker = path.join(dir, "omp.bunx");
+		const targetPath = path.join(dir, "mop.exe");
+		const marker = path.join(dir, "mop.bunx");
 		await Bun.write(targetPath, "bun shim");
 		await Bun.write(marker, "bun launcher metadata");
-		const exe = `#!/bin/sh\necho omp/${version}\n`;
+		const exe = `#!/bin/sh\necho mop/${version}\n`;
 		const { build, fetchImpl } = offer(exe);
 
 		await updateViaBinaryAt(targetPath, build, {
@@ -1630,8 +1627,8 @@ describe("update-cli script-shim takeover", () => {
 
 	it.skipIf(process.platform === "win32")("reports the physical binary path verified after an update", async () => {
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
-		const exe = `#!/bin/sh\necho omp/${version}\n`;
+		const targetPath = path.join(dir, "mop");
+		const exe = `#!/bin/sh\necho mop/${version}\n`;
 		await Bun.write(targetPath, "old binary");
 		const logSpy = spyOn(console, "log").mockImplementation(() => {});
 
@@ -1650,14 +1647,14 @@ describe("update-cli script-shim takeover", () => {
 		const dir = await makeTempDir();
 		await writeShims(dir);
 		// Executable runs but reports the previous version -> full rollback.
-		const exe = "#!/bin/sh\necho omp/17.2.12\n";
+		const exe = "#!/bin/sh\necho mop/17.2.12\n";
 		const { build, fetchImpl } = offer(exe);
 
 		await expect(
-			updateViaShimTakeover(path.join(dir, "omp.cmd"), build, { fetchImpl, verifyBinary }),
-		).rejects.toThrow(/still reports 17\.2\.12 \(expected 18\.0\.0\); restored previous omp launcher/);
+			updateViaShimTakeover(path.join(dir, "mop.cmd"), build, { fetchImpl, verifyBinary }),
+		).rejects.toThrow(/still reports 17\.2\.12 \(expected 18\.0\.0\); restored previous mop launcher/);
 
-		expect(await Bun.file(path.join(dir, "omp.exe")).exists()).toBe(false);
+		expect(await Bun.file(path.join(dir, "mop.exe")).exists()).toBe(false);
 		for (const name in shims) {
 			expect(await Bun.file(path.join(dir, name)).text()).toBe(shims[name]);
 		}
@@ -1668,7 +1665,7 @@ describe("update-cli script-shim takeover", () => {
 	function renameLockingPs1(): Mock<typeof nodeFs.promises.rename> {
 		const realRename = nodeFs.promises.rename;
 		return spyOn(nodeFs.promises, "rename").mockImplementation(async (from, to) => {
-			if (path.basename(String(from)) === "omp.ps1") {
+			if (path.basename(String(from)) === "mop.ps1") {
 				throw Object.assign(new Error("EPERM: file is locked"), { code: "EPERM" });
 			}
 			return await realRename(from, to);
@@ -1678,38 +1675,38 @@ describe("update-cli script-shim takeover", () => {
 	it("rewrites an immovable precedence-winning shim as a forwarder to the exe", async () => {
 		const dir = await makeTempDir();
 		await writeShims(dir);
-		const exe = `#!/bin/sh\necho omp/${version}\n`;
+		const exe = `#!/bin/sh\necho mop/${version}\n`;
 		const renameSpy = renameLockingPs1();
 		const { build, fetchImpl } = offer(exe);
 		try {
-			await updateViaShimTakeover(path.join(dir, "omp.cmd"), build, { fetchImpl, verifyBinary });
+			await updateViaShimTakeover(path.join(dir, "mop.cmd"), build, { fetchImpl, verifyBinary });
 		} finally {
 			renameSpy.mockRestore();
 		}
 
-		expect(await Bun.file(path.join(dir, "omp.exe")).text()).toBe(exe);
-		expect(await Bun.file(path.join(dir, "omp")).exists()).toBe(false);
-		expect(await Bun.file(path.join(dir, "omp.cmd")).exists()).toBe(false);
+		expect(await Bun.file(path.join(dir, "mop.exe")).text()).toBe(exe);
+		expect(await Bun.file(path.join(dir, "mop")).exists()).toBe(false);
+		expect(await Bun.file(path.join(dir, "mop.cmd")).exists()).toBe(false);
 		// PowerShell resolves .ps1 before .exe: the locked shim must now exec
 		// the new binary instead of keeping its old body.
-		expect(await Bun.file(path.join(dir, "omp.ps1")).text()).toContain('& "$PSScriptRoot\\omp.exe" @args');
+		expect(await Bun.file(path.join(dir, "mop.ps1")).text()).toContain('& "$PSScriptRoot\\mop.exe" @args');
 	});
 
 	it("restores a forwarded shim's original body when verification fails", async () => {
 		const dir = await makeTempDir();
 		await writeShims(dir);
-		const exe = "#!/bin/sh\necho omp/17.2.12\n";
+		const exe = "#!/bin/sh\necho mop/17.2.12\n";
 		const renameSpy = renameLockingPs1();
 		const { build, fetchImpl } = offer(exe);
 		try {
 			await expect(
-				updateViaShimTakeover(path.join(dir, "omp.cmd"), build, { fetchImpl, verifyBinary }),
-			).rejects.toThrow("restored previous omp launcher");
+				updateViaShimTakeover(path.join(dir, "mop.cmd"), build, { fetchImpl, verifyBinary }),
+			).rejects.toThrow("restored previous mop launcher");
 		} finally {
 			renameSpy.mockRestore();
 		}
 
-		expect(await Bun.file(path.join(dir, "omp.exe")).exists()).toBe(false);
+		expect(await Bun.file(path.join(dir, "mop.exe")).exists()).toBe(false);
 		for (const name in shims) {
 			expect(await Bun.file(path.join(dir, name)).text()).toBe(shims[name]);
 		}
@@ -1730,7 +1727,7 @@ describe("update-cli concurrent binary updates", () => {
 		setThemeInstance(loadedTheme);
 		vi.spyOn(console, "log").mockImplementation(() => {});
 		const dir = await makeTempDir();
-		const targetPath = path.join(dir, "omp");
+		const targetPath = path.join(dir, "mop");
 		await Bun.write(targetPath, "old binary");
 		return { dir, targetPath };
 	}
@@ -1819,7 +1816,7 @@ describe("managedInstallName", () => {
 		const root = await makeTempDir();
 		await fs.mkdir(path.join(root, "versions"));
 		await fs.mkdir(path.join(root, "bin"));
-		await Bun.write(path.join(root, "versions", "1.0.0"), "omp");
+		await Bun.write(path.join(root, "versions", "1.0.0"), "mop");
 		await Bun.write(path.join(root, "manager.json"), JSON.stringify({ manager: "tern", name: "Tern" }));
 		return root;
 	}
@@ -1828,9 +1825,9 @@ describe("managedInstallName", () => {
 		"names the manager through the launcher symlink and a link outside the root",
 		async () => {
 			const root = await managedRoot();
-			const launcher = path.join(root, "bin", "omp");
+			const launcher = path.join(root, "bin", "mop");
 			await fs.symlink(path.join("..", "versions", "1.0.0"), launcher);
-			const outside = path.join(await makeTempDir(), "omp");
+			const outside = path.join(await makeTempDir(), "mop");
 			await fs.symlink(launcher, outside);
 
 			expect(await managedInstallName(launcher)).toBe("Tern");
@@ -1840,15 +1837,15 @@ describe("managedInstallName", () => {
 
 	it("names the manager of a copied launcher (Windows layout)", async () => {
 		const root = await managedRoot();
-		const copy = path.join(root, "bin", "omp.exe");
-		await Bun.write(copy, "omp");
+		const copy = path.join(root, "bin", "mop.exe");
+		await Bun.write(copy, "mop");
 
 		expect(await managedInstallName(copy)).toBe("Tern");
 	});
 
 	it("treats a binary without a readable manifest as unmanaged", async () => {
-		const plain = path.join(await makeTempDir(), "bin", "omp");
-		await Bun.write(plain, "omp");
+		const plain = path.join(await makeTempDir(), "bin", "mop");
+		await Bun.write(plain, "mop");
 		expect(await managedInstallName(plain)).toBeUndefined();
 
 		const root = await managedRoot();
@@ -1861,10 +1858,10 @@ describe("update-cli manager update recovery", () => {
 	const release: ReleaseInfo = {
 		tag: "v18.0.1",
 		version: "18.0.1",
-		packages: { pkg: "@oh-my-pi/pi-coding-agent", natives: "@oh-my-pi/pi-natives" },
+		packages: { pkg: "@mop/pi-coding-agent", natives: "@mop/pi-natives" },
 		registry: "https://registry.npmjs.org/",
 	};
-	const launcherPath = "C:/Users/test/AppData/Roaming/npm/omp.cmd";
+	const launcherPath = "C:/Users/test/AppData/Roaming/npm/mop.cmd";
 
 	function scriptedSteps(script: {
 		install: InstalledVersionVerification | Error | undefined;

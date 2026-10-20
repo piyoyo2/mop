@@ -189,7 +189,7 @@ describe("native transcript", () => {
 		await h.render();
 		expect(h.find(node => node.k === "md")?.p).toMatchObject({ text: source, stream: true });
 
-		const wt = "file:///C:/Users/me/.omp/wt/cr2-43939c6";
+		const wt = "file:///C:/Users/me/.mop/wt/cr2-43939c6";
 		component.updateContent(assistant([{ type: "text", text: source }]));
 		component.setLinkTargets(
 			new Map([

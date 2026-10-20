@@ -24,7 +24,7 @@
  *   ... --synth openrouter/openai/gpt-oss-120b
  *
  * Auth: provider API keys resolve through omp's auth storage
- * (~/.omp/agent/agent.db: stored key, OAuth, or env var fallback).
+ * (~/.mop/agent/agent.db: stored key, OAuth, or env var fallback).
  */
 
 import { parseArgs } from "node:util";

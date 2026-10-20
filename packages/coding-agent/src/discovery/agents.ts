@@ -52,7 +52,7 @@ const HOST_PROBE_TIMEOUT_MS = 500;
  * `undefined` when the command fails, produces no output, or exceeds the
  * timeout. On timeout the child is killed with SIGKILL so a wedged interop pipe
  * cannot hang startup; the killed/non-zero exit is then reported as
- * "unavailable" and discovery falls back to the Linux `$HOME`/`~/.omp`
+ * "unavailable" and discovery falls back to the Linux `$HOME`/`~/.mop`
  * candidates.
  */
 export function runHostProbe(cmd: string[], timeoutMs = HOST_PROBE_TIMEOUT_MS): string | undefined {

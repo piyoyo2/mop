@@ -47,7 +47,7 @@ beforeEach(async () => {
 	await fs.mkdir(home, { recursive: true });
 	restoreEnvValue("HOME", home);
 	vi.spyOn(os, "homedir").mockReturnValue(home);
-	setAgentDir(path.join(home, ".omp", "agent"));
+	setAgentDir(path.join(home, ".mop", "agent"));
 	AgentRegistry.resetGlobalForTests();
 	AgentLifecycleManager.resetGlobalForTests();
 	IrcBus.resetGlobalForTests();
@@ -100,7 +100,7 @@ function resultForLatestPrompt(messages: ReadonlyArray<{ role: string; content: 
 async function spawnKeptAliveChild(options?: { handler?: MockHandler; structured?: boolean; enableIrc?: boolean }) {
 	// Under the isolated HOME: project discovery walks up from cwd and stops at os.homedir(). On Windows
 	// os.tmpdir() lives under the real home, so a cwd outside the fake HOME would walk into the real
-	// ~/.omp and load the developer's installed plugins as project plugins.
+	// ~/.mop and load the developer's installed plugins as project plugins.
 	const cwd = path.join(root, "home", "work");
 	const artifactsDir = path.join(root, "artifacts");
 	await fs.mkdir(cwd, { recursive: true });

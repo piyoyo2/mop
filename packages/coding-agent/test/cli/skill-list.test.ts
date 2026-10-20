@@ -21,7 +21,7 @@ beforeEach(async () => {
 	originalAgentDir = getAgentDir();
 	tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "omp-skill-list-home-"));
 	spyOn(os, "homedir").mockReturnValue(tempHome);
-	setAgentDir(path.join(tempHome, ".omp", "agent"));
+	setAgentDir(path.join(tempHome, ".mop", "agent"));
 });
 
 afterEach(async () => {
@@ -48,7 +48,11 @@ describe("runSkillsCommand", () => {
 		try {
 			const result = await runSkillsCommand({
 				cwd: directory,
-				skillsSettings: { customDirectories: [path.join(skillsRoot, "first"), path.join(skillsRoot, "second")] },
+				skillsSettings: {
+					customDirectories: [path.join(skillsRoot, "first"), path.join(skillsRoot, "second")],
+					// mop's own bundled corpus is not part of this listing.
+					excludeProviders: ["mop-bundled"],
+				},
 			});
 
 			// Home/agent-dir isolation (see the file-level beforeEach) means only the
@@ -110,7 +114,7 @@ describe("runSkillsCommand", () => {
 		try {
 			const result = await runSkillsCommand({
 				cwd: directory,
-				skillsSettings: { customDirectories: ["~/example-skills"] },
+				skillsSettings: { customDirectories: ["~/example-skills"], excludeProviders: ["mop-bundled"] },
 			});
 			// The listing must agree with the loader: a tilde entry resolves
 			// against the home directory, not against the inspected directory.
@@ -140,7 +144,7 @@ describe("handleSkillList", () => {
 			);
 		}
 		await Bun.write(
-			path.join(directory, ".omp", "config.yml"),
+			path.join(directory, ".mop", "config.yml"),
 			"skills:\n  customDirectories:\n    - first\n    - second\n",
 		);
 

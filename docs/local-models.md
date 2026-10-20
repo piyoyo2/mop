@@ -40,7 +40,7 @@ The tiny-model CLI and source registry retain **title** and **memory** groupings
   (`nix/package.nix`) sets this by default.
 - **One text worker per model/backend, keep-alive not persistent**: each tiny text model/backend
   pair is served by one machine-wide worker owning
-  `~/.omp/run/tiny/<model>-<backend>.sock` (Windows: a named pipe).
+  `~/.mop/run/tiny/<model>-<backend>.sock` (Windows: a named pipe).
   ONNX and MLX workers for the same model can coexist. The first omp process that needs
   the pair spawns it detached (log next to the socket, `<model>-<backend>.log`);
   other omp processes connect, so weights are not duplicated per omp instance.
@@ -71,9 +71,9 @@ The tiny-model CLI and source registry retain **title** and **memory** groupings
     default.
 - **MLX backend (Apple silicon)**: `PI_TINY_DEVICE=mlx` (or `metal`) swaps the worker itself, not
   the ONNX provider: the per-model worker is `mlx-server.py` running from a pinned `mlx-lm` venv
-  that omp installs under `~/.omp/agent/cache/tiny-mlx-runtime/` on first use (via `uv`, else
+  that omp installs under `~/.mop/agent/cache/tiny-mlx-runtime/` on first use (via `uv`, else
   `python3 -m venv` with Python ≥ 3.10). It downloads the model's pre-quantized 4-bit MLX export
-  (`mlxRepo` in the registry) into `~/.omp/agent/cache/tiny-models/mlx/` with per-byte progress,
+  (`mlxRepo` in the registry) into `~/.mop/agent/cache/tiny-models/mlx/` with per-byte progress,
   loads it with `mlx_lm.load`, and speaks the exact protocol the ONNX worker speaks, so titles,
   memory completions, and local typed judgments use the same backend. Inference runs in the
   Python worker. `PI_TINY_DTYPE` is ignored by MLX. If the venv bootstrap fails (no Python,

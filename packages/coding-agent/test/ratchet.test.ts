@@ -40,7 +40,7 @@ afterEach(async () => {
 	await fs.rm(root, { recursive: true, force: true });
 });
 
-const flowPath = (...parts: string[]) => path.join(root, ".omp/ratchet", FLOW, ...parts);
+const flowPath = (...parts: string[]) => path.join(root, ".mop/ratchet", FLOW, ...parts);
 
 async function setup(options: { hold?: string[]; models?: unknown[] } = {}): Promise<Harness> {
 	const session = {

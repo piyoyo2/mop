@@ -1285,7 +1285,7 @@ export class FileSessionStorage implements SessionStorage {
 
 	/**
 	 * The lease is an OS lock (abstract socket, named mutex, or `flock` sidecar
-	 * under ~/.omp/run/session-owners), so the kernel drops a dead owner's claim.
+	 * under ~/.mop/run/session-owners), so the kernel drops a dead owner's claim.
 	 * Never throws: a lock that cannot be taken for another reason counts as
 	 * owned, so it never moves a session off its file.
 	 */

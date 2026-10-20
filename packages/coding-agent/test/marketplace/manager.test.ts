@@ -96,7 +96,7 @@ function createTestContext(): TestContext {
 	const dirs = {
 		mktRegistry: path.join(tmpDir, "marketplaces.json"),
 		instRegistry: path.join(tmpDir, "installed_plugins.json"),
-		// Distinct runtime root from user scope, mirroring production (~/.omp/plugins vs <project>/.omp/plugins).
+		// Distinct runtime root from user scope, mirroring production (~/.mop/plugins vs <project>/.mop/plugins).
 		projectInstRegistry: path.join(tmpDir, "project", "installed_plugins.json"),
 		mktCache: path.join(tmpDir, "cache", "marketplaces"),
 		plugCache: path.join(tmpDir, "cache", "plugins"),
@@ -227,7 +227,7 @@ describe("MarketplaceManager", () => {
 
 		try {
 			const added = await ctx.manager.addMarketplace(FIXTURE_DIR);
-			const catalogPath = "~/.omp/plugins/cache/marketplaces/test-marketplace/marketplace.json";
+			const catalogPath = "~/.mop/plugins/cache/marketplaces/test-marketplace/marketplace.json";
 			const registry = await readMarketplacesRegistry(registryPath);
 			await writeMarketplacesRegistry(registryPath, {
 				...registry,
@@ -639,9 +639,9 @@ describe("MarketplaceManager", () => {
 	it("installPlugin exposes marketplace package to the runtime loader", async () => {
 		const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "omp-mgr-home-"));
 		try {
-			const pluginsDir = path.join(tmpHome, ".omp", "plugins");
+			const pluginsDir = path.join(tmpHome, ".mop", "plugins");
 			const manager = new MarketplaceManager({
-				marketplacesRegistryPath: path.join(tmpHome, ".omp", "marketplaces.json"),
+				marketplacesRegistryPath: path.join(tmpHome, ".mop", "marketplaces.json"),
 				installedRegistryPath: path.join(pluginsDir, "installed_plugins.json"),
 				marketplacesCacheDir: path.join(pluginsDir, "cache", "marketplaces"),
 				pluginsCacheDir: path.join(pluginsDir, "cache", "plugins"),
@@ -725,9 +725,9 @@ describe("MarketplaceManager", () => {
 	it("installPlugin keeps marketplace packages out of OMP extension roots", async () => {
 		const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "omp-mgr-home-"));
 		try {
-			const pluginsDir = path.join(tmpHome, ".omp", "plugins");
+			const pluginsDir = path.join(tmpHome, ".mop", "plugins");
 			const manager = new MarketplaceManager({
-				marketplacesRegistryPath: path.join(tmpHome, ".omp", "marketplaces.json"),
+				marketplacesRegistryPath: path.join(tmpHome, ".mop", "marketplaces.json"),
 				installedRegistryPath: path.join(pluginsDir, "installed_plugins.json"),
 				marketplacesCacheDir: path.join(pluginsDir, "cache", "marketplaces"),
 				pluginsCacheDir: path.join(pluginsDir, "cache", "plugins"),
@@ -752,11 +752,11 @@ describe("MarketplaceManager", () => {
 		const tmpHome = fs.mkdtempSync(path.join(os.tmpdir(), "omp-mgr-home-"));
 		const projectAnchor = fs.mkdtempSync(path.join(os.tmpdir(), "omp-mgr-project-"));
 		try {
-			const userPluginsDir = path.join(tmpHome, ".omp", "plugins");
-			const projectPluginsDir = path.join(projectAnchor, ".omp", "plugins");
+			const userPluginsDir = path.join(tmpHome, ".mop", "plugins");
+			const projectPluginsDir = path.join(projectAnchor, ".mop", "plugins");
 			fs.mkdirSync(projectPluginsDir, { recursive: true });
 			const manager = new MarketplaceManager({
-				marketplacesRegistryPath: path.join(tmpHome, ".omp", "marketplaces.json"),
+				marketplacesRegistryPath: path.join(tmpHome, ".mop", "marketplaces.json"),
 				installedRegistryPath: path.join(userPluginsDir, "installed_plugins.json"),
 				projectInstalledRegistryPath: path.join(projectPluginsDir, "installed_plugins.json"),
 				marketplacesCacheDir: path.join(userPluginsDir, "cache", "marketplaces"),

@@ -355,7 +355,7 @@ export function isForeignUserProvider(providerId: string): boolean {
 
 /**
  * Check whether a user-level (~/...) config source is enabled.
- * Native (.omp) and .agents directories are enabled by default.
+ * Native (.mop) and .agents directories are enabled by default.
  * Foreign tool directories (~/.cursor, ~/.codex, ~/.claude, etc.) are opt-in
  * via `enabledProviders`. Project-level (cwd) config is unaffected; see
  * {@link isProviderEnabled} for the whole-provider switch.

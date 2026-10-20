@@ -16,7 +16,7 @@ function extension(kind: Extension["kind"], name: string, provider: string): Ext
 		name,
 		displayName: name,
 		description: `${name} description`,
-		path: `/home/u/.omp/${kind}/${name}.md`,
+		path: `/home/u/.mop/${kind}/${name}.md`,
 		source: { provider, providerName: provider, level: "user" },
 		state: "active",
 		raw: { content: `# ${name}` },

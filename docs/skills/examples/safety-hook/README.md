@@ -13,7 +13,7 @@ This deliberately narrow regex also blocks targets such as `/tmp/example`. It do
 ## Install
 
 ```
-cp -r . ~/.omp/agent/extensions/safety-hook
+cp -r . ~/.mop/agent/extensions/safety-hook
 ```
 
 Restart `omp`. The hook is active in sessions that load this extension.

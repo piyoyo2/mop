@@ -12,7 +12,7 @@ import { Container, type TUI } from "@oh-my-pi/pi-tui";
 import { removeWithRetries } from "@oh-my-pi/pi-utils";
 import { clearCache, readDirEntries } from "@oh-my-pi/pi-coding-agent/capability/fs";
 
-const PROJECT_OPTION = "This project (.omp/rules)";
+const PROJECT_OPTION = "This project (.mop/rules)";
 
 const usage: Usage = {
 	input: 0,
@@ -175,7 +175,7 @@ describe("OmfgController", () => {
 		expect(harness.container.children).toHaveLength(0);
 		expect(signal?.aborted).toBe(true);
 		expect(controller.hasActiveRequest()).toBe(false);
-		expect(await Bun.file(path.join(harness.projectDir, ".omp", "rules", "ts-no-any.md")).exists()).toBe(false);
+		expect(await Bun.file(path.join(harness.projectDir, ".mop", "rules", "ts-no-any.md")).exists()).toBe(false);
 	});
 
 	it("invalidates the discovery cache after saving so rediscovery observes the new rule", async () => {
@@ -195,7 +195,7 @@ describe("OmfgController", () => {
 			messages: createMatchingMessages(),
 			selectorChoice: PROJECT_OPTION,
 		});
-		const rulesDir = path.join(harness.projectDir, ".omp", "rules");
+		const rulesDir = path.join(harness.projectDir, ".mop", "rules");
 
 		// Warm the discovery cache with the pre-save (absent) directory snapshot, the
 		// state the mid-session rule rediscovery would read on the next prompt rebuild.

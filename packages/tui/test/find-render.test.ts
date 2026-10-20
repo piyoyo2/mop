@@ -106,10 +106,10 @@ describe("findToolRenderer", () => {
 		const uiTheme = (await getThemeByName("dark"))!;
 		const ompDetails: FindToolDetails = {
 			...details,
-			scopePath: "omp://",
+			scopePath: "mop://",
 			hits: [
 				{
-					rel: "omp://tools/read.md",
+					rel: "mop://tools/read.md",
 					contentScore: 0.9,
 					linesSeen: 40,
 					truncated: false,
@@ -126,9 +126,9 @@ describe("findToolRenderer", () => {
 			)
 			.render(200);
 		const uris = extractLinkUris(lines.join("\n"));
-		expect(uris).toContain("omp://tools/read.md");
-		expect(uris).toContain("omp://tools/read.md:10");
-		expect(uris.every(uri => !uri.endsWith("/repo/omp://tools/read.md"))).toBe(true);
+		expect(uris).toContain("mop://tools/read.md");
+		expect(uris).toContain("mop://tools/read.md:10");
+		expect(uris.every(uri => !uri.endsWith("/repo/mop://tools/read.md"))).toBe(true);
 	});
 
 	it("shows one range per hit collapsed and all ranges plus failures expanded", async () => {
