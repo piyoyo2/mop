@@ -1,8 +1,8 @@
+# mop
+
 <div align="center">
   <img src="mop.png" alt="mop" width="320">
 </div>
-
-# mop
 
 A coding agent for **character cards**.
 
