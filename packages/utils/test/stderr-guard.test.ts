@@ -194,9 +194,9 @@ describe("stderr guard", () => {
 		const report = JSON.parse(stdout) as RotationReport;
 		// 2026-09-22T17:00Z is 2026-09-23 01:00 in Singapore: the sink names
 		// the local day, and getLogPath() must name the same file.
-		expect(report.startupFile).toBe(`omp.2026-09-23.${proc.pid}.log`);
+		expect(report.startupFile).toBe(`mop.2026-09-23.${proc.pid}.log`);
 		expect(report.logPathBasename).toBe(report.startupFile);
-		expect(report.currentFile).toBe(`omp.2026-09-24.${proc.pid}.log`);
+		expect(report.currentFile).toBe(`mop.2026-09-24.${proc.pid}.log`);
 
 		if (report.forced) {
 			expect(report.startupBody).toContain("startup-day-marker");

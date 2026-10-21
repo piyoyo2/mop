@@ -53,15 +53,15 @@ describe("native directory override", () => {
 		const cache = path.join(tempRoot, "cache");
 		const data = path.join(tempRoot, "data");
 		const shared = path.join(tempRoot, "shared");
-		await fs.mkdir(path.join(cache, "omp", "profiles", "isolated"), { recursive: true });
-		await fs.mkdir(path.join(data, "omp", "profiles", "isolated"), { recursive: true });
+		await fs.mkdir(path.join(cache, "mop", "profiles", "isolated"), { recursive: true });
+		await fs.mkdir(path.join(data, "mop", "profiles", "isolated"), { recursive: true });
 		process.env.XDG_CACHE_HOME = cache;
 		process.env.XDG_DATA_HOME = data;
 		process.env.PI_CONFIG_DIR = ".alternate";
 		process.env.OMP_PROFILE = "isolated";
 		__resetDirsFromEnvForTests();
 		const defaultNatives = path.join(
-			xdgPlatform ? path.join(cache, "omp") : path.join(home, ".alternate"),
+			xdgPlatform ? path.join(cache, "mop") : path.join(home, ".alternate"),
 			"profiles",
 			"isolated",
 			"natives",

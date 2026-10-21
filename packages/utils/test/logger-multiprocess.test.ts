@@ -74,16 +74,16 @@ describe("multiprocess file logging", () => {
 		const expiredNames: string[] = [];
 		for (const pid of exitedPids) {
 			for (let daysAgo = -1; daysAgo <= 5; daysAgo++) {
-				const name = `omp.${localDate(daysAgo)}.${pid}.log`;
+				const name = `mop.${localDate(daysAgo)}.${pid}.log`;
 				await Bun.write(path.join(logsDir, name), name);
 				await fs.utimes(path.join(logsDir, name), 2, 2);
 				(daysAgo > 0 && daysAgo < 5 ? retainedNames : expiredNames).push(name);
 			}
-			const rolloverName = `omp.${localDate(0)}.${pid}.log.1`;
+			const rolloverName = `mop.${localDate(0)}.${pid}.log.1`;
 			await Bun.write(path.join(logsDir, rolloverName), rolloverName);
 			await fs.utimes(path.join(logsDir, rolloverName), 2, 2);
 			retainedNames.push(rolloverName);
-			await Bun.write(path.join(logsDir, `.omp.${pid}-audit.json`), "{}");
+			await Bun.write(path.join(logsDir, `.mop.${pid}-audit.json`), "{}");
 		}
 
 		for (let restart = 0; restart < 2; restart++) {
@@ -111,13 +111,13 @@ describe("multiprocess file logging", () => {
 		const now = new Date();
 		const localDate = (daysAgo: number): string => localDayBefore(now, daysAgo);
 		const expired = [
-			`omp.${localDate(30)}.log`,
-			`omp.${localDate(30)}.log.1`,
-			`omp.${localDate(30)}.log.gz`,
-			`omp.${localDate(30)}.log.2.gz`,
+			`mop.${localDate(30)}.log`,
+			`mop.${localDate(30)}.log.1`,
+			`mop.${localDate(30)}.log.gz`,
+			`mop.${localDate(30)}.log.2.gz`,
 			".0123456789abcdef0123456789abcdef01234567-audit.json",
 		];
-		const retained = [`omp.${localDate(1)}.log`, `omp.${localDate(1)}.log.gz`, ".fedcba9876543210-audit.json"];
+		const retained = [`mop.${localDate(1)}.log`, `mop.${localDate(1)}.log.gz`, ".fedcba9876543210-audit.json"];
 		for (const name of [...expired, ...retained]) await Bun.write(path.join(logsDir, name), name);
 		const thirtyDaysAgoSec = (Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000;
 		await fs.utimes(path.join(logsDir, expired[4]!), thirtyDaysAgoSec, thirtyDaysAgoSec);

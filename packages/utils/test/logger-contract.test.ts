@@ -127,7 +127,7 @@ describe("central logger byte contract", () => {
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
 		const log = await readSingleLog(result.primaryDir);
-		expect(log.name).toBe(`omp.2026-01-01.${result.pid}.log`);
+		expect(log.name).toBe(`mop.2026-01-01.${result.pid}.log`);
 		const expected = [
 			expectedLine(result.pid, "error", "level-error", { ordinal: 1 }),
 			expectedLine(result.pid, "warn", "level-warn", { ordinal: 2 }),
@@ -366,7 +366,7 @@ describe("DailyRotateFile option and retention contract", () => {
 		const result = await runScenario("date-retention");
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
-		const expectedNames = [2, 3, 4, 5, 6].map(day => `omp.2026-01-0${day}.${result.pid}.log`);
+		const expectedNames = [2, 3, 4, 5, 6].map(day => `mop.2026-01-0${day}.${result.pid}.log`);
 		expect(await logFileNames(result.primaryDir)).toEqual(expectedNames);
 		for (const [offset, name] of expectedNames.entries()) {
 			const day = offset + 2;
@@ -382,7 +382,7 @@ describe("DailyRotateFile option and retention contract", () => {
 		const result = await runScenario("size-rotation");
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toBe("");
-		const baseName = `omp.2026-01-01.${result.pid}.log`;
+		const baseName = `mop.2026-01-01.${result.pid}.log`;
 		const rotatedName = `${baseName}.1`;
 		expect(await logFileNames(result.primaryDir)).toEqual([baseName, rotatedName]);
 		const basePath = path.join(result.primaryDir, baseName);
