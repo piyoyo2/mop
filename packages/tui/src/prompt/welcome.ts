@@ -8,7 +8,7 @@ import type { DescribeContext, NativeChild, NativeNode } from "../native/node";
 import { compactText, plainText } from "../native/spans";
 import { isNativeRendering } from "../native/state";
 import { isHyperlinkEnabled, urlHyperlink, urlLinkSpan } from "../render/hyperlink";
-import { TERMINAL } from "../terminal-capabilities";
+import { getTerminalBackgroundColor, TERMINAL } from "../terminal-capabilities";
 import { theme } from "../theme/theme";
 import type { Component } from "../tui";
 import { padding, replaceTabs, visibleWidth, wrapTextWithAnsi } from "../utils";
@@ -211,6 +211,8 @@ export class WelcomeComponent implements Component {
 	// Bypassed while the intro animation runs (every frame differs).
 	#cachedWidth = -1;
 	#cachedLines: string[] | undefined;
+	/** Ink the cached lines were painted in; the terminal background can change. */
+	#cachedInk: LogoInk | undefined;
 	#native: { tip: string | undefined; node: NativeNode } | undefined;
 
 	constructor(private version: string) {}
@@ -226,6 +228,7 @@ export class WelcomeComponent implements Component {
 	invalidate(): void {
 		this.#cachedWidth = -1;
 		this.#cachedLines = undefined;
+		this.#cachedInk = undefined;
 		this.#native = undefined;
 	}
 
@@ -356,25 +359,30 @@ export class WelcomeComponent implements Component {
 
 	render(termWidth: number): readonly string[] {
 		const animating = this.#animStart != null;
-		if (!animating && this.#cachedLines && this.#cachedWidth === termWidth) {
+		// The ink follows the terminal background, so it is part of the cache key:
+		// a terminal that flips appearance repaints with the other ink.
+		const ink = logoInk();
+		if (!animating && this.#cachedLines && this.#cachedWidth === termWidth && this.#cachedInk === ink) {
 			return this.#cachedLines;
 		}
-		const lines = this.#renderLines(termWidth);
+		const lines = this.#renderLines(termWidth, ink);
 		if (animating) {
 			this.#cachedLines = undefined;
 			this.#cachedWidth = -1;
+			this.#cachedInk = undefined;
 		} else {
 			this.#cachedLines = lines;
 			this.#cachedWidth = termWidth;
+			this.#cachedInk = ink;
 		}
 		return lines;
 	}
 
-	#renderLines(termWidth: number): string[] {
+	#renderLines(termWidth: number, ink: LogoInk): string[] {
 		// Content keeps a column clear on each side; everything centers in the full width.
 		const room = termWidth - 2;
 		if (room < 4) return [];
-		const logo = this.#currentLogoFrame();
+		const logo = this.#currentLogoFrame(ink);
 		const version = theme.fg("dim", `v${this.version}`);
 		const lockupWidth = LOGO_WIDTH + LOCKUP_GAP + Math.max(WORDMARK_WIDTH, visibleWidth(version));
 		const art = room >= lockupWidth ? lockup(logo, version) : room >= LOGO_WIDTH ? logo : [];
@@ -400,11 +408,11 @@ export class WelcomeComponent implements Component {
 	}
 
 	/** Pick the logo frame for the current intro phase, or the resting frame. */
-	#currentLogoFrame(): readonly string[] {
-		if (this.#animStart == null) return REST_FRAME;
+	#currentLogoFrame(ink: LogoInk): readonly string[] {
+		if (this.#animStart == null) return restFrame(ink);
 		const elapsed = performance.now() - this.#animStart;
-		if (elapsed >= INTRO_MS) return REST_FRAME;
-		return introLogoFrame(elapsed / INTRO_MS);
+		if (elapsed >= INTRO_MS) return restFrame(ink);
+		return introLogoFrame(elapsed / INTRO_MS, ink);
 	}
 }
 
@@ -461,12 +469,37 @@ export function logoNode(lines: readonly string[], shimmer: boolean): NativeNode
 }
 
 /**
- * The ink the brand mark is stamped in. The mark is a shape on the terminal,
- * not a light source: it reads against whatever sits behind it, so it is flat
- * rather than a gradient. Raise it (the theme's `muted`, say) when the
- * terminal background is too dark for black to read.
+ * The ink the brand mark is stamped in.
+ *
+ * The mark is a shape on the terminal, not a light source, so it is flat
+ * rather than a gradient — and it takes the opposite of whatever is behind it:
+ * near-white on a dark terminal, black on a light one. Every surface that
+ * draws the mark draws it straight onto the terminal background, so one
+ * adaptive ink covers all of them.
  */
-const LOGO_COLOR: readonly [number, number, number] = [0, 0, 0];
+export type LogoInk = "light" | "dark";
+
+/** The ink that reads against the terminal's own background. */
+export function logoInk(): LogoInk {
+	const background = getTerminalBackgroundColor();
+	// Rec. 601 luma over the terminal's measured background: a light terminal
+	// takes dark ink, a dark one takes light ink.
+	const luma = 0.299 * ((background >> 16) & 0xff) + 0.587 * ((background >> 8) & 0xff) + 0.114 * (background & 0xff);
+	return luma > 128 ? "dark" : "light";
+}
+
+/**
+ * Each ink's base colour and the colour its shine band moves toward.
+ *
+ * On a dark mark the shine is a highlight (toward white); on a light mark it
+ * is a shadow (toward grey), so the sweep stays visible either way.
+ */
+const LOGO_INKS: Readonly<
+	Record<LogoInk, { base: readonly [number, number, number]; shine: readonly [number, number, number] }>
+> = {
+	light: { base: [255, 255, 255], shine: [110, 110, 118] },
+	dark: { base: [0, 0, 0], shine: [255, 255, 255] },
+};
 
 /** Half-width of the shine highlight band, expressed in gradient-t units. */
 const SHINE_HALF_WIDTH = 0.18;
@@ -486,21 +519,24 @@ function shineStrength(t: number, shine: ShineConfig | undefined): number {
 }
 
 /**
- * SGR escape painting one cell of the brand mark: flat {@link LOGO_COLOR},
- * with the optional shine band lifted toward white.
+ * SGR escape painting one cell of the brand mark: flat ink, with the optional
+ * shine band composited on top.
  *
  * `t` is the normalized diagonal position of the cell, so a caller painting
  * the mark in screen space can hand in the same projection its backdrop uses.
  */
-export function flatLogoEscape(t: number, shine: ShineConfig | undefined): string {
+export function flatLogoEscape(t: number, shine: ShineConfig | undefined, ink: LogoInk = logoInk()): string {
 	const strength = shineStrength(t, shine);
+	const { base, shine: shineTarget } = LOGO_INKS[ink];
 	if (TERMINAL.trueColor) {
-		const lift = (channel: number) => Math.round(channel + (255 - channel) * strength);
-		const [r, g, b] = LOGO_COLOR;
-		return `\x1b[38;2;${lift(r)};${lift(g)};${lift(b)}m`;
+		const mix = (channel: number, target: number) => Math.round(channel + (target - channel) * strength);
+		const [r, g, b] = base;
+		const [sr, sg, sb] = shineTarget;
+		return `\x1b[38;2;${mix(r, sr)};${mix(g, sg)};${mix(b, sb)}m`;
 	}
-	// 256-color: black is slot 16; the shine lifts it to the light grey.
-	return `\x1b[38;5;${strength > 0.5 ? 255 : 16}m`;
+	// 256-color: 16 is black, 231 is white; the shine moves to a grey.
+	if (ink === "dark") return `\x1b[38;5;${strength > 0.5 ? 255 : 16}m`;
+	return `\x1b[38;5;${strength > 0.5 ? 240 : 231}m`;
 }
 
 /**
@@ -511,7 +547,7 @@ export function flatLogoEscape(t: number, shine: ShineConfig | undefined): strin
  * gradient the setup splash shares with its backdrop: a flat stamp reads
  * against any background.
  */
-export function flatLogo(lines: readonly string[], shine?: ShineConfig): string[] {
+export function flatLogo(lines: readonly string[], shine?: ShineConfig, ink: LogoInk = logoInk()): string[] {
 	const reset = "\x1b[0m";
 	const rows = lines.length;
 	const cols = Math.max(...lines.map(line => line.length));
@@ -528,7 +564,7 @@ export function flatLogo(lines: readonly string[], shine?: ShineConfig): string[
 			// The same diagonal projection the gradient uses, so the shine band
 			// crosses the mark the same way it crosses the splash backdrop.
 			const t = (x / xSpan + y / ySpan) / 2;
-			result += flatLogoEscape(t, shine) + char + reset;
+			result += flatLogoEscape(t, shine, ink) + char + reset;
 		}
 		return result;
 	});
@@ -624,12 +660,21 @@ const INTRO_SHINE_TRAVERSALS = 3;
  * diagonal at a steady pace while its strength fades with the same ease-out
  * curve, leaving a clean stamp by the resting frame.
  */
-function introLogoFrame(progress: number): string[] {
+function introLogoFrame(progress: number, ink: LogoInk): string[] {
 	const eased = 1 - (1 - progress) ** 3;
 	const shinePos = (((progress * INTRO_SHINE_TRAVERSALS) % 1) + 1) % 1;
 	const shineStrength = (1 - eased) ** 1.5;
-	return flatLogo(PI_LOGO, { strength: shineStrength, pos: shinePos });
+	return flatLogo(PI_LOGO, { strength: shineStrength, pos: shinePos }, ink);
 }
 
-/** Resting frame, cached for re-renders outside of the intro. */
-const REST_FRAME = flatLogo(PI_LOGO);
+/** Resting frames, one per ink; cached for re-renders outside of the intro. */
+const restFrames = new Map<LogoInk, string[]>();
+
+function restFrame(ink: LogoInk): string[] {
+	let frame = restFrames.get(ink);
+	if (!frame) {
+		frame = flatLogo(PI_LOGO, undefined, ink);
+		restFrames.set(ink, frame);
+	}
+	return frame;
+}

@@ -1,6 +1,14 @@
 import { centerLine, visibleWidth } from "../../utils";
 import { padToWidth } from "../../render/utils";
-import { flatLogo, flatLogoEscape, gradientEscape, logoNode, PI_LOGO, type ShineConfig } from "../../prompt/welcome";
+import {
+	flatLogo,
+	flatLogoEscape,
+	gradientEscape,
+	logoInk,
+	logoNode,
+	PI_LOGO,
+	type ShineConfig,
+} from "../../prompt/welcome";
 import { theme } from "../../theme/theme";
 import { formatKeyHint } from "../../app-keybindings";
 import { col, node, span, text } from "../../native/describe";
@@ -227,14 +235,16 @@ export function renderSetupSplash(width: number, height: number, elapsedMs: numb
 		}
 	}
 	// 3. hero — the brand mark stamped in flat ink, with the shine sweeping
-	// across it on the same diagonal the backdrop's gradient runs.
+	// across it on the same diagonal the backdrop's gradient runs. The ink is
+	// resolved once per frame: it depends on the terminal background.
+	const ink = logoInk();
 	LARGE_LOGO.forEach((line, row) => {
 		let col = 0;
 		for (const ch of line) {
 			const x = hx + col;
 			const y = hy + row;
 			if (ch !== " " && y >= 0 && y < h && x >= 0 && x < w) {
-				cells[y][x] = flatLogoEscape(screenGradientT(x, y, w, h, phase), shine) + ch + RESET;
+				cells[y][x] = flatLogoEscape(screenGradientT(x, y, w, h, phase), shine, ink) + ch + RESET;
 			}
 			col++;
 		}

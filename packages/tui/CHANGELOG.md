@@ -4,7 +4,7 @@
 
 ### Changed
 
-- The brand mark is now stamped in flat black and drawn upside down, and the startup wordmark reads `mop` instead of `omp`
+- The brand mark is now drawn upside down and spelled `mop`, and it is stamped in flat ink that follows the terminal background: near-white on a dark terminal, black on a light one
 
 ### Added
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
-import { pickWeightedTip, WelcomeComponent } from "@oh-my-pi/pi-tui/prompt/welcome";
+import { logoInk, pickWeightedTip, WelcomeComponent } from "@oh-my-pi/pi-tui/prompt/welcome";
 import { initTheme, theme } from "@oh-my-pi/pi-tui/theme";
 import { visibleWidth } from "@oh-my-pi/pi-tui";
 
@@ -119,5 +119,20 @@ describe("WelcomeComponent", () => {
 		expect(narrow).toContain("████████████");
 		expect(narrow).not.toContain("█▀▄▀▄");
 		expect(narrow).not.toContain("v1.0.0");
+	});
+
+	it("stamps the mark in the ink that reads against the terminal background", () => {
+		const previous = Bun.env.COLORFGBG;
+		try {
+			// COLORFGBG is the terminal-derived appearance signal the TUI falls
+			// back to when the terminal does not answer an OSC 11 query.
+			Bun.env.COLORFGBG = "0;15";
+			expect(logoInk()).toBe("dark");
+			Bun.env.COLORFGBG = "0;0";
+			expect(logoInk()).toBe("light");
+		} finally {
+			if (previous === undefined) delete Bun.env.COLORFGBG;
+			else Bun.env.COLORFGBG = previous;
+		}
 	});
 });
