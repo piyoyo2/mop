@@ -1,6 +1,6 @@
 import { centerLine, visibleWidth } from "../../utils";
 import { padToWidth } from "../../render/utils";
-import { gradientEscape, gradientLogo, logoNode, PI_LOGO, type ShineConfig } from "../../prompt/welcome";
+import { flatLogo, flatLogoEscape, gradientEscape, logoNode, PI_LOGO, type ShineConfig } from "../../prompt/welcome";
 import { theme } from "../../theme/theme";
 import { formatKeyHint } from "../../app-keybindings";
 import { col, node, span, text } from "../../native/describe";
@@ -226,13 +226,16 @@ export function renderSetupSplash(width: number, height: number, elapsedMs: numb
 			if (star) put(x, y, star);
 		}
 	}
-	// 3. hero — the brand mark with the live gradient + shine sweep
+	// 3. hero — the brand mark stamped in flat ink, with the shine sweeping
+	// across it on the same diagonal the backdrop's gradient runs.
 	LARGE_LOGO.forEach((line, row) => {
 		let col = 0;
 		for (const ch of line) {
 			const x = hx + col;
 			const y = hy + row;
-			if (ch !== " " && y >= 0 && y < h && x >= 0 && x < w) cells[y][x] = gradient(x, y) + ch + RESET;
+			if (ch !== " " && y >= 0 && y < h && x >= 0 && x < w) {
+				cells[y][x] = flatLogoEscape(screenGradientT(x, y, w, h, phase), shine) + ch + RESET;
+			}
 			col++;
 		}
 	});
@@ -263,7 +266,7 @@ export function describeSetupSplash(): NativeNode {
 			[
 				node("spacer", { grow: 1 }),
 				logoNode(LARGE_LOGO, true),
-				text([span("O h   M y   P i", "strong")], { wrap: "none" }),
+				text([span("M o p", "strong")], { wrap: "none" }),
 				node("spacer", { grow: 1 }),
 				text([span(hint, "dim")], { wrap: "none" }),
 			],
@@ -275,7 +278,7 @@ export function describeSetupSplash(): NativeNode {
 /** Centered fallback for windows too small to hold the full scene. */
 function renderCompactSplash(width: number, height: number, phase: number, shine: ShineConfig): string[] {
 	const art = height >= 14 ? LARGE_LOGO : PI_LOGO;
-	const content = [...gradientLogo(art, phase, shine), "", theme.bold("O h   M y   P i")];
+	const content = [...flatLogo(art, shine), "", theme.bold("M o p")];
 	const start = Math.max(0, Math.floor((height - content.length) / 2));
 	const lines: string[] = [];
 	for (let y = 0; y < height; y++) {

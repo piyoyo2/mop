@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The brand mark is now stamped in flat black and drawn upside down, and the startup wordmark reads `mop` instead of `omp`
+
 ### Added
 
 - Added `mergeLineRanges` and an optional `BareLineMode` argument to `parseLineRanges` (`"single"` reads a lone bare `N` as that one line) ([#16435](https://github.com/can1357/oh-my-pi/pull/16435) by [@will-bogusz](https://github.com/will-bogusz))

@@ -409,16 +409,16 @@ export class WelcomeComponent implements Component {
 }
 
 /** Block-grid brand mark shared by the welcome and setup surfaces. */
-export const PI_LOGO = ["████████████", "   ██  ██   ", "   ██  ██   ", "   ▒▒  ██   ", "       ██   "];
+export const PI_LOGO = ["       ██   ", "   ▒▒  ██   ", "   ██  ██   ", "   ██  ██   ", "████████████"];
 
 /** Columns of {@link PI_LOGO}. */
 const LOGO_WIDTH = Math.max(...PI_LOGO.map(row => row.length));
 
 /**
- * The `omp` wordmark in half-blocks, set beside {@link PI_LOGO} from its second
+ * The `mop` wordmark in half-blocks, set beside {@link PI_LOGO} from its second
  * row: the `p` descends into the fourth, the version takes the fifth.
  */
-const WORDMARK = ["▄▀▀▄ █▀▄▀▄ █▀▀▄", "▀▄▄▀ █ █ █ █▄▄▀", "           █"];
+const WORDMARK = ["█▀▄▀▄ ▄▀▀▄ █▀▀▄", "█ █ █ ▀▄▄▀ █▄▄▀", "           █"];
 
 /** Columns of {@link WORDMARK}. */
 const WORDMARK_WIDTH = Math.max(...WORDMARK.map(row => row.length));
@@ -460,15 +460,13 @@ export function logoNode(lines: readonly string[], shimmer: boolean): NativeNode
 	);
 }
 
-/** Multi-stop palette for the diagonal gradient. */
-const GRADIENT_STOPS: ReadonlyArray<readonly [number, number, number]> = [
-	[248, 79, 204], // oklch(0.7 0.24 340)
-	[147, 98, 244], // oklch(0.62 0.21 295)
-	[0, 219, 228], // oklch(0.81 0.14 200)
-];
-
-/** 256-color ramp fallback when truecolor isn't available. */
-const GRADIENT_RAMP_256 = [206, 170, 134, 99, 69, 74, 44];
+/**
+ * The ink the brand mark is stamped in. The mark is a shape on the terminal,
+ * not a light source: it reads against whatever sits behind it, so it is flat
+ * rather than a gradient. Raise it (the theme's `muted`, say) when the
+ * terminal background is too dark for black to read.
+ */
+const LOGO_COLOR: readonly [number, number, number] = [0, 0, 0];
 
 /** Half-width of the shine highlight band, expressed in gradient-t units. */
 const SHINE_HALF_WIDTH = 0.18;
@@ -480,6 +478,72 @@ export interface ShineConfig {
 	pos: number;
 }
 
+/** Shine strength at a normalized diagonal position `t`. */
+function shineStrength(t: number, shine: ShineConfig | undefined): number {
+	if (!shine || shine.strength <= 0) return 0;
+	const dist = Math.abs(t - shine.pos);
+	return dist < SHINE_HALF_WIDTH ? (1 - dist / SHINE_HALF_WIDTH) * shine.strength : 0;
+}
+
+/**
+ * SGR escape painting one cell of the brand mark: flat {@link LOGO_COLOR},
+ * with the optional shine band lifted toward white.
+ *
+ * `t` is the normalized diagonal position of the cell, so a caller painting
+ * the mark in screen space can hand in the same projection its backdrop uses.
+ */
+export function flatLogoEscape(t: number, shine: ShineConfig | undefined): string {
+	const strength = shineStrength(t, shine);
+	if (TERMINAL.trueColor) {
+		const lift = (channel: number) => Math.round(channel + (255 - channel) * strength);
+		const [r, g, b] = LOGO_COLOR;
+		return `\x1b[38;2;${lift(r)};${lift(g)};${lift(b)}m`;
+	}
+	// 256-color: black is slot 16; the shine lifts it to the light grey.
+	return `\x1b[38;5;${strength > 0.5 ? 255 : 16}m`;
+}
+
+/**
+ * The brand mark painted in one flat ink, with an optional sliding shine band
+ * composited on top.
+ *
+ * The mark is drawn on the terminal itself, so it must not depend on the
+ * gradient the setup splash shares with its backdrop: a flat stamp reads
+ * against any background.
+ */
+export function flatLogo(lines: readonly string[], shine?: ShineConfig): string[] {
+	const reset = "\x1b[0m";
+	const rows = lines.length;
+	const cols = Math.max(...lines.map(line => line.length));
+	const xSpan = Math.max(1, cols - 1);
+	const ySpan = Math.max(1, rows - 1);
+	return lines.map((line, y) => {
+		let result = "";
+		for (let x = 0; x < line.length; x++) {
+			const char = line[x];
+			if (char === " ") {
+				result += char;
+				continue;
+			}
+			// The same diagonal projection the gradient uses, so the shine band
+			// crosses the mark the same way it crosses the splash backdrop.
+			const t = (x / xSpan + y / ySpan) / 2;
+			result += flatLogoEscape(t, shine) + char + reset;
+		}
+		return result;
+	});
+}
+
+/** Multi-stop palette for the diagonal gradient. */
+const GRADIENT_STOPS: ReadonlyArray<readonly [number, number, number]> = [
+	[248, 79, 204], // oklch(0.7 0.24 340)
+	[147, 98, 244], // oklch(0.62 0.21 295)
+	[0, 219, 228], // oklch(0.81 0.14 200)
+];
+
+/** 256-color ramp fallback when truecolor isn't available. */
+const GRADIENT_RAMP_256 = [206, 170, 134, 99, 69, 74, 44];
+
 /**
  * Resolve the gradient SGR foreground escape for a normalized position `t`
  * (0..1) along the diagonal, compositing the optional sliding shine highlight.
@@ -487,8 +551,7 @@ export interface ShineConfig {
  * color-identical (truecolor when available, 256-color ramp otherwise).
  */
 export function gradientEscape(t: number, shine?: ShineConfig): string {
-	const shineStrength = shine && shine.strength > 0 ? shine.strength : 0;
-	const shinePos = shine ? shine.pos : 0;
+	const strength = shineStrength(t, shine);
 	if (TERMINAL.trueColor) {
 		// 5-stop palette widens the visible color range and avoids the
 		// deep-blue valley a naive HSL lerp falls into.
@@ -501,25 +564,17 @@ export function gradientEscape(t: number, shine?: ShineConfig): string {
 		let r = a[0] + (b[0] - a[0]) * f;
 		let g = a[1] + (b[1] - a[1]) * f;
 		let bl = a[2] + (b[2] - a[2]) * f;
-		if (shineStrength > 0) {
-			const dist = Math.abs(t - shinePos);
-			const intensity = Math.max(0, 1 - dist / SHINE_HALF_WIDTH) * shineStrength;
-			if (intensity > 0) {
-				r += (255 - r) * intensity;
-				g += (255 - g) * intensity;
-				bl += (255 - bl) * intensity;
-			}
+		if (strength > 0) {
+			r += (255 - r) * strength;
+			g += (255 - g) * strength;
+			bl += (255 - bl) * strength;
 		}
 		return `\x1b[38;2;${Math.round(r)};${Math.round(g)};${Math.round(bl)}m`;
 	}
 	const ramp = GRADIENT_RAMP_256;
 	let idx = Math.min(ramp.length - 1, Math.max(0, Math.floor(t * (ramp.length - 1) + 0.5)));
-	if (shineStrength > 0) {
-		const dist = Math.abs(t - shinePos);
-		const intensity = Math.max(0, 1 - dist / SHINE_HALF_WIDTH) * shineStrength;
-		// Promote to the brightest ramp slot when the shine band peaks here.
-		if (intensity > 0.5) idx = ramp.length - 1;
-	}
+	// Promote to the brightest ramp slot when the shine band peaks here.
+	if (strength > 0.5) idx = ramp.length - 1;
 	return `\x1b[38;5;${ramp[idx]}m`;
 }
 
@@ -558,31 +613,23 @@ export function gradientLogo(lines: readonly string[], phase = 0, shine?: ShineC
 const INTRO_MS = 3000;
 /** Render cadence during the intro (~30fps). */
 const INTRO_TICK_MS = 33;
-/** Number of full gradient rotations the sweep performs before settling. */
-const INTRO_SWEEPS = 2.5;
 /** Number of times the shine highlight crosses the diagonal across the intro. */
 const INTRO_SHINE_TRAVERSALS = 3;
 
 /**
  * Logo frame for a normalized intro progress in [0, 1).
  *
- * Ease-out cubic so the spin decelerates into the resting state. The gradient
- * sweeps backward through INTRO_SWEEPS full rotations (`eased == 1` → phase =
- * 0 = resting frame) while the shine traverses the diagonal at a steady pace,
- * decoupled from the gradient phase so the two layers parallax; its strength
- * fades with the same ease-out curve so the highlight is gone by the resting
- * frame.
+ * Ease-out cubic so the sweep decelerates into the resting state. The mark is
+ * flat ink, so the shine band is the only thing that moves: it traverses the
+ * diagonal at a steady pace while its strength fades with the same ease-out
+ * curve, leaving a clean stamp by the resting frame.
  */
 function introLogoFrame(progress: number): string[] {
 	const eased = 1 - (1 - progress) ** 3;
-	const phase = ((((1 - eased) * INTRO_SWEEPS) % 1) + 1) % 1;
 	const shinePos = (((progress * INTRO_SHINE_TRAVERSALS) % 1) + 1) % 1;
 	const shineStrength = (1 - eased) ** 1.5;
-	return gradientLogo(PI_LOGO, phase, {
-		strength: shineStrength,
-		pos: shinePos,
-	});
+	return flatLogo(PI_LOGO, { strength: shineStrength, pos: shinePos });
 }
 
-/** Resting gradient frame, cached for re-renders outside of the intro. */
-const REST_FRAME = gradientLogo(PI_LOGO, 0);
+/** Resting frame, cached for re-renders outside of the intro. */
+const REST_FRAME = flatLogo(PI_LOGO);
