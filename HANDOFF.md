@@ -4,7 +4,8 @@
 **Repo:** https://github.com/piyoyo2/mop
 **Fork base:** [`can1357/oh-my-pi`](https://github.com/can1357/oh-my-pi) @ `7820b7de27` (v18.12.3)
 **Status:** Milestone 1 complete and verified. Milestone 2 (the analyzer tools) complete and
-verified in the compiled binary. Milestone 3 not started.
+verified in the compiled binary. The brand and the product version are done. Milestone 3 not
+started.
 **Last updated:** 2026-10-21
 
 ---
@@ -388,6 +389,66 @@ have. The browser chunk is flaky under load — a second run showed 32 failures,
 timeouts. No new failures. `packages/utils` was 14 red before milestone 2 (stale
 rebrand fixtures) and is green now. Lint, format, and types are clean across all packages.
 
+### Phase 11 — The brand and the product version
+
+**The brand mark.** `packages/tui/src/prompt/welcome.ts` owns everything the startup banner
+draws:
+
+- `PI_LOGO` — the block-grid mark (5 rows × 12 columns). **Now drawn upside down**: the
+  rows are reversed, so the bar sits at the bottom and the stems rise from it.
+- `WORDMARK` — the half-block wordmark, which used to spell `omp` and now spells `mop`.
+  The rebrand missed it because it is a literal array, not a string built from `APP_NAME`.
+- The mark is painted by a new `flatLogo()` in **flat ink** rather than the old diagonal
+  gradient, and the ink **follows the terminal background**: near-white on a dark terminal,
+  black on a light one.
+- The version under the wordmark is `v0.1` (see below).
+
+The ink decision reads the terminal's *measured* background — `getTerminalBackgroundColor()`
+returns the real OSC 11 colour when the terminal answers, and falls back to `COLORFGBG` /
+macOS appearance otherwise. The choice is a Rec. 601 luma check on that colour, so a
+mid-grey terminal also lands on the readable side. The welcome banner's render cache
+carries the ink in its key, so a terminal that flips appearance repaints in the other ink
+rather than serving stale lines.
+
+**The product version.** mop now reports `0.1`, not upstream's `18.12.3`.
+
+This could not be done by bumping the package version. `VERSION` (the build version) is
+what the **changelog gate** compares against: `getNewEntries(entries, VERSION)` must be
+empty, i.e. no released changelog section may be ahead of it. mop's `CHANGELOG.md` still
+carries upstream's inherited history, whose newest released section is `## [18.12.3]`.
+Setting the build version to `0.1.0` makes *every* inherited release read as "new" — a
+fresh install would get upstream's entire changelog dumped at it as a startup notice — and
+it breaks a test that pins the invariant. Bun also refuses to link the workspace unless the
+catalog specifier matches the package version exactly, so `0.1` (two segments) is not an
+option at all.
+
+So the two concepts are now separate:
+
+| | Value | Used for |
+|---|---|---|
+| `VERSION` (`packages/utils/src/dirs.ts`) | `18.12.3` | the changelog gate, the update check, the user agent — the fork base's build line |
+| `APP_VERSION` (`packages/utils/src/dirs.ts`) | `0.1.0` | what mop advertises to users: the banner, the startup prepaint, `mop --version` |
+| `formatVersion()` (`packages/utils/src/version.ts`) | — | display form: `0.1.0` → `0.1`, while `0.1.5` keeps its patch |
+
+`mop --version` prints `mop/0.1` and the banner shows `v0.1`. The other workspace packages
+still carry `18.12.3` in their `package.json`s; bumping the whole workspace to `0.1.0` is a
+release decision (it collides with upstream's `@oh-my-pi/*` namespace on publish), not a
+splash-screen change, so it was left for the release-pipeline work.
+
+**Where the startup text lives** (all of it is hand-editable):
+
+| What | Where |
+|---|---|
+| The logo, the wordmark, the version | `packages/tui/src/prompt/welcome.ts` |
+| The tips (34 of them, one per line) | `packages/tui/src/prompt/tips.txt` |
+| The "Please use nerdfont" nag | `packages/tui/src/prompt/welcome.ts` (hardcoded, 10% chance under the `unicode` preset) |
+| The setup wizard's splash, outro, and overlay | `packages/tui/src/setup/` |
+
+`tips.txt` is inlined at build time, so the compiled binary needs a rebuild to pick up an
+edit; running from source reads it at runtime. Its lines support `{key:ctrl+d}` key hints,
+`[Label](url)` links, a trailing `[NEW]` (a shimmering tag, weighted 4× toward being
+picked), and a leading `[NO-TERN]` (hidden on Tern-style terminals).
+
 ---
 
 ## 3. Architecture reference
@@ -417,6 +478,30 @@ packages/coding-agent/
 docs/tools/card_budget.md ...          one root doc per builtin tool
 AGENTS.md                              mop's own development rules
 ```
+
+### The brand and the version
+
+Everything the startup banner draws lives in `packages/tui/src/prompt/welcome.ts`:
+`PI_LOGO` (the block-grid mark, drawn upside down), `WORDMARK` (the half-block `mop`), the
+flat ink it is painted in, and the version under the wordmark. The tips come from
+`packages/tui/src/prompt/tips.txt`. The setup wizard's splash, outro, and overlay live in
+`packages/tui/src/setup/` and import the same mark.
+
+The mark is painted in **flat ink that follows the terminal background** — near-white on a
+dark terminal, black on a light one — decided from the terminal's measured background
+(`getTerminalBackgroundColor()`: the real OSC 11 colour, else `COLORFGBG`, else macOS
+appearance) by a Rec. 601 luma check.
+
+Two versions, deliberately:
+
+| | Value | Used for |
+|---|---|---|
+| `VERSION` (`packages/utils/src/dirs.ts`) | `18.12.3` | the changelog gate, the update check, the user agent — the fork base's build line |
+| `APP_VERSION` (`packages/utils/src/dirs.ts`) | `0.1.0` | what mop advertises: the banner, the startup prepaint, `mop --version` |
+| `formatVersion()` (`packages/utils/src/version.ts`) | — | display form: `0.1.0` → `0.1`; `0.1.5` keeps its patch |
+
+`VERSION` cannot move: the changelog gate asserts that no released changelog section is
+ahead of it, and mop's changelog still carries the inherited `18.x` history.
 
 ### How a skill reaches the model
 
@@ -499,6 +584,8 @@ the two disagree, the reference file is the spec and `domain.ts` is the bug.
 | 4 | **Release pipeline** | No GitHub releases exist, so `curl \| sh` cannot work yet. The installer is correct but has nothing to fetch. `mop update` still points at a build service product named `mop` that does not exist. |
 | 5 | **First-run provider migration** | mop starts with an empty `~/.mop/agent/models.yml`. The user has to copy omp's by hand (Phase 9). A `mop config migrate` that detects `~/.omp/agent/` and offers to import would remove a real papercut. |
 | 6 | **Local provider** | `~/.mop/agent/models.yml` lists a `local` provider at `http://localhost:20128/v1`, which was not running during this session. Untested. |
+| 7 | **Brand leftovers** | The classic-terminal banner is fully rebranded, but three surfaces still say `omp`: the **native/TSP path** draws the logo from a terminal-provided `builtin: "omp"` image (that asset lives in the terminal, not this repo, so it cannot be recoloured from here); the **TSP handshake** sends `app: "omp"` (`packages/tui/src/native/encode.ts`); and **eight of the 34 tips** in `packages/tui/src/prompt/tips.txt` still say `omp`. Each is a one-word fix. |
+| 8 | **Workspace version line** | Only `packages/utils` carries mop's `0.1.0`; the other packages are still `18.12.3`. Bumping them all collides with upstream's `@oh-my-pi/*` namespace on publish, so it belongs with the release pipeline. |
 
 `AGENTS.md` was rewritten for mop (no longer upstream's), and the analyzer tools landed
 (Milestone 2). Both are done and no longer listed here.
@@ -579,9 +666,16 @@ all seven tools exercised end to end through the compiled binary (`mop -p`).
 4. **Release pipeline.** A GitHub Actions workflow that builds the binary for
    linux/macOS × x64/arm64 and publishes `mop-<version>-<target>` assets plus
    `.sha256` sidecars, matching what the installer expects. Then `mop update` can move
-   off the build-service client.
+   off the build-service client. This is also where the **workspace version line**
+   gets decided: the other packages still carry upstream's `18.12.3`, and bumping them
+   to `0.1.0` collides with upstream's `@oh-my-pi/*` namespace on publish.
 5. **Rename the SDK packages** to `mop-rpc` (python, go, rust) so a published mop does
    not collide with upstream.
+6. **Sweep the last `omp` strings** (each a one-word fix): the eight tips in
+   `packages/tui/src/prompt/tips.txt` that still say `omp`, and the `app: "omp"` the TSP
+   handshake sends (`packages/tui/src/native/encode.ts`). The native path's
+   `builtin: "omp"` logo image cannot be fixed from here — that asset ships with the
+   terminal.
 
 ---
 
@@ -642,6 +736,18 @@ Things that are not obvious from the code and cost time to rediscover.
   expected the app to be named `omp` (log file names, XDG app dirs, profile roots) after
   the code had moved to `mop`. Fixed in milestone 2 — the package is green again. When the
   rebrand's sweep is redone upstream, expect the same class of drift elsewhere.
+- **The build version and the product version are different things.** `VERSION` must stay
+  on upstream's release line: the changelog gate asserts that no released changelog section
+  is ahead of it, and mop's changelog still carries the inherited `18.x` history. Bumping
+  it to `0.1.0` makes every inherited release read as "new" to a fresh install. `APP_VERSION`
+  is the number mop advertises. See Phase 11.
+- **Bun links a workspace package only when the catalog specifier matches its version
+  exactly**, so a two-segment version (`0.1`) is not usable, and changing one package's
+  version means changing its catalog entry in the same commit.
+- The **terminal background** is measurable: `getTerminalBackgroundColor()` returns the
+  real OSC 11 colour when the terminal answers, and falls back to `COLORFGBG` then macOS
+  appearance. Anything that has to read against the terminal — the brand mark — should
+  branch on that rather than assume a dark background.
 
 **About the domain**
 
@@ -679,6 +785,12 @@ mop -p "prompt"                                    # print mode
 mop skills list                                    # what is available
 mop read "skill://card-anatomy/references/four-box-model.md"
 mop models                                         # providers and models
+mop read "mop://tools/card_budget.md"              # a builtin's root doc
+
+# brand
+#   the logo, wordmark, ink, and version → packages/tui/src/prompt/welcome.ts
+#   the tips                            → packages/tui/src/prompt/tips.txt
+#   the product version                 → APP_VERSION in packages/utils/src/dirs.ts
 
 # ship
 git fetch --refetch upstream                       # if the partial clone lost blobs
@@ -697,6 +809,8 @@ git push origin main
 | Analyzer tools | `packages/coding-agent/src/tools/card/` |
 | Tool descriptions | `packages/coding-agent/src/prompts/tools/*.md` |
 | Tool root docs | `docs/tools/<name>.md` |
+| Brand mark, wordmark, tips | `packages/tui/src/prompt/welcome.ts`, `packages/tui/src/prompt/tips.txt` |
+| Product version | `APP_VERSION` in `packages/utils/src/dirs.ts` |
 | Development rules | `AGENTS.md` |
 | Config | `~/.mop/agent/` (skills materialize to `~/.mop/skills/`) |
 | Lore library | `~/.mop/agent/lore/` |
