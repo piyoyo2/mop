@@ -22,6 +22,18 @@ import { isBunTestRuntime } from "./test-runtime";
 /** App name (e.g. "mop") */
 export const APP_NAME: string = "mop";
 
+/**
+ * mop's own product version — the one it advertises to users.
+ *
+ * Distinct from {@link VERSION}, which is the *build* version inherited from the
+ * upstream fork base. The build version has to stay on the upstream release
+ * line: the changelog gate compares the newest released changelog section
+ * against it, and mop's changelog still carries the inherited history. Bumping
+ * the build version would make every inherited release read as "new" to a
+ * fresh install.
+ */
+export const APP_VERSION: string = "0.1.0";
+
 /** Public homepage that inference gateways (OpenRouter, Vercel AI Gateway) credit omp traffic to. */
 export const APP_URL: string = "https://omp.sh/";
 

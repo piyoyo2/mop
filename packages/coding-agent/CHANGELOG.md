@@ -6,6 +6,7 @@
 
 - mop: a character-card authoring agent — 13 bundled skills (routers with on-demand reference files) covering the JanitorAI card model, macro rules, the anti-slop rubric, lorebooks, the lore library, worldbuilding, voice profiles, review, and forensics; a light main-agent skeleton; and a read-only `reader` subagent
 - Seven card-analysis tools that make the card checks executable: `card_budget` bands a card or lorebook field against the token budgets, `card_macro_check` finds spaced, unknown, and collapsed macros, `tokenize` counts tokens with a real BPE tokenizer, `text_entropy`, `text_fingerprint`, and `ghost_phrase_scan` score a passage for the shape of generated prose, and `library_search` finds candidates in the lore library
+- mop now reports its own product version (`0.1`) instead of the inherited upstream build version; `mop --version` and the startup banner both show it
 
 ### Changed
 

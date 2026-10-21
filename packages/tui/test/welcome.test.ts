@@ -1,4 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
+import { formatVersion } from "@oh-my-pi/pi-utils/version";
 import { logoInk, pickWeightedTip, WelcomeComponent } from "@oh-my-pi/pi-tui/prompt/welcome";
 import { initTheme, theme } from "@oh-my-pi/pi-tui/theme";
 import { visibleWidth } from "@oh-my-pi/pi-tui";
@@ -98,27 +99,33 @@ describe("WelcomeComponent", () => {
 	});
 
 	it("drops the tip below 50 columns", () => {
-		const text = (columns: number) => Bun.stripANSI(new WelcomeComponent("1.0.0").render(columns).join("\n"));
+		const text = (columns: number) => Bun.stripANSI(new WelcomeComponent("1.2.3").render(columns).join("\n"));
 		expect(text(50)).toContain("Tip: ");
 		expect(text(49)).not.toContain("Tip: ");
-		expect(text(49)).toContain("v1.0.0");
+		expect(text(49)).toContain("v1.2.3");
+	});
+
+	it("shows the version in its shortest form", () => {
+		expect(formatVersion("0.1.0")).toBe("0.1");
+		expect(formatVersion("0.1.5")).toBe("0.1.5");
+		expect(formatVersion("18.12.3")).toBe("18.12.3");
 	});
 
 	it("sets the version under the wordmark while the lockup fits, else keeps the logo alone", () => {
-		const rows = (columns: number) => new WelcomeComponent("1.0.0").render(columns).map(row => Bun.stripANSI(row));
+		const rows = (columns: number) => new WelcomeComponent("1.2.3").render(columns).map(row => Bun.stripANSI(row));
 
 		// The lockup needs 12 logo + 4 gap + 15 wordmark columns inside the 2-column margin.
 		const fits = rows(33);
 		// The wordmark's first glyph is the `m`; the version shares its column.
 		const word = fits.find(row => row.includes("█▀▄▀▄"));
-		const version = fits.find(row => row.includes("v1.0.0"));
+		const version = fits.find(row => row.includes("v1.2.3"));
 		expect(fits.some(row => row.includes("████████████"))).toBe(true);
-		expect(version?.indexOf("v1.0.0")).toBe(word?.indexOf("█▀▄▀▄"));
+		expect(version?.indexOf("v1.2.3")).toBe(word?.indexOf("█▀▄▀▄"));
 
 		const narrow = rows(32).join("\n");
 		expect(narrow).toContain("████████████");
 		expect(narrow).not.toContain("█▀▄▀▄");
-		expect(narrow).not.toContain("v1.0.0");
+		expect(narrow).not.toContain("v1.2.3");
 	});
 
 	it("stamps the mark in the ink that reads against the terminal background", () => {

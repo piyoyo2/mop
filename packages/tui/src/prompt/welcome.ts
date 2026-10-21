@@ -1,4 +1,5 @@
 import { APP_NAME } from "@oh-my-pi/pi-utils/dirs";
+import { formatVersion } from "@oh-my-pi/pi-utils/version";
 import type { TspSpan } from "@oh-my-pi/pi-wire";
 import { formatDoubleTap, formatKeyHint, formatKeyHints, type KeyName } from "../app-keybindings";
 import { editorKey } from "../chrome/keybinding-hints";
@@ -263,7 +264,7 @@ export class WelcomeComponent implements Component {
 						col(
 							[
 								art([span(APP_NAME, "strong")], "omp.welcome.wordmark"),
-								art([span(`v${this.version}`, "dim mono")], "omp.welcome.version"),
+								art([span(`v${formatVersion(this.version)}`, "dim mono")], "omp.welcome.version"),
 							],
 							{ role: "omp.welcome.mark" },
 						),
@@ -383,7 +384,7 @@ export class WelcomeComponent implements Component {
 		const room = termWidth - 2;
 		if (room < 4) return [];
 		const logo = this.#currentLogoFrame(ink);
-		const version = theme.fg("dim", `v${this.version}`);
+		const version = theme.fg("dim", `v${formatVersion(this.version)}`);
 		const lockupWidth = LOGO_WIDTH + LOCKUP_GAP + Math.max(WORDMARK_WIDTH, visibleWidth(version));
 		const art = room >= lockupWidth ? lockup(logo, version) : room >= LOGO_WIDTH ? logo : [];
 		const lines = centerBlock(art, termWidth);

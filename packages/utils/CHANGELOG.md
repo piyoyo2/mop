@@ -5,6 +5,8 @@
 ### Added
 
 - Added `getLoreDir()` to `@oh-my-pi/pi-utils`: the lore library directory (`~/.mop/agent/lore`)
+- Added `APP_VERSION` to `@oh-my-pi/pi-utils`: mop's own product version (`0.1.0`), separate from the inherited build version
+- Added `formatVersion()` to `@oh-my-pi/pi-utils`: a version in its shortest unambiguous form (`0.1.0` → `0.1`)
 
 ### Fixed
 

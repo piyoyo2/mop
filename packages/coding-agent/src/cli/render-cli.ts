@@ -18,7 +18,7 @@ import { Agent } from "@oh-my-pi/pi-agent-core";
 import type { Terminal, TerminalAppearance, TerminalAppearanceRequestToken } from "@oh-my-pi/pi-tui/terminal";
 import type { RenderScheduler } from "@oh-my-pi/pi-tui/tui";
 import { formatBytes, getProjectDir, logger, TempDir } from "@oh-my-pi/pi-utils";
-import { VERSION } from "@oh-my-pi/pi-utils/dirs";
+import { APP_VERSION } from "@oh-my-pi/pi-utils/dirs";
 import { ModelRegistry } from "../config/model-registry";
 import { Settings } from "../config/settings";
 import { Composer } from "@oh-my-pi/pi-tui/prompt/composer";
@@ -182,7 +182,7 @@ export async function runRenderCommand(args: RenderCommandArgs): Promise<number>
 			tuiOptions: { renderScheduler: scheduler },
 			preferences: { quiet: true },
 		});
-		mode = new InteractiveMode(session, VERSION, undefined, undefined, undefined, undefined, undefined, composer);
+		mode = new InteractiveMode(session, APP_VERSION, undefined, undefined, undefined, undefined, undefined, composer);
 		await mode.init({ suppressWelcomeIntro: true });
 		scheduler.drain();
 

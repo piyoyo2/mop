@@ -5,6 +5,7 @@
 ### Changed
 
 - The brand mark is now drawn upside down and spelled `mop`, and it is stamped in flat ink that follows the terminal background: near-white on a dark terminal, black on a light one
+- The version under the wordmark is now mop's own product version (`v0.1`) rather than the inherited build version
 
 ### Added
 

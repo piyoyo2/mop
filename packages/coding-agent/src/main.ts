@@ -13,6 +13,7 @@ import { getModelPricingStatus } from "@oh-my-pi/pi-catalog/models";
 import { isEnoent, isEnotdir } from "@oh-my-pi/pi-utils";
 import {
 	APP_NAME,
+	APP_VERSION,
 	directoryIsMissing,
 	getLogPath,
 	getProjectDir,
@@ -21,6 +22,7 @@ import {
 	VERSION,
 } from "@oh-my-pi/pi-utils/dirs";
 import { $env, isBunTestRuntime, isCompiledBinary, setInteractiveHost } from "@oh-my-pi/pi-utils/env";
+import { formatVersion } from "@oh-my-pi/pi-utils/version";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import * as postmortem from "@oh-my-pi/pi-utils/postmortem";
 import { fuzzyFilter } from "@oh-my-pi/pi-tui/fuzzy";
@@ -1797,7 +1799,7 @@ export async function runRootCommand(
 		const notifs: (InteractiveModeNotify | null)[] = [];
 
 		if (parsedArgs.version) {
-			writeStartupNotice(parsedArgs, `${VERSION}\n`);
+			writeStartupNotice(parsedArgs, `${formatVersion(APP_VERSION)}\n`);
 			process.exit(0);
 		}
 
@@ -2685,7 +2687,7 @@ export async function runRootCommand(
 					logger.endTiming();
 					await runInteractiveMode(
 						session,
-						VERSION,
+						APP_VERSION,
 						startupChangelog,
 						notifs,
 						versionCheckPromise,

@@ -1,6 +1,18 @@
 const DIGITS = /^\d+$/;
 
 /**
+ * The version in its shortest unambiguous form, for display.
+ *
+ * `0.1.0` reads as `0.1` while `0.1.5` keeps its patch — a trailing zero
+ * patch never distinguishes one release from another, and the banner has room
+ * for a shorter number. The canonical version stays full semver everywhere a
+ * machine reads it.
+ */
+export function formatVersion(version: string): string {
+	return version.replace(/\.0$/, "");
+}
+
+/**
  * Compare two version strings.
  *
  * Canonical comparator that supersedes the historical in-repo copies
