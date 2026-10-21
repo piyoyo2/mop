@@ -72,6 +72,9 @@ the canonical name and the bundled one steps aside under a namespaced alias.
 
 ## Development
 
+See [HANDOFF.md](HANDOFF.md) for the full project history, architecture reference, and
+what to work on next.
+
 ```sh
 bun install
 bun run build:native          # Rust addon (host builds do not need bazel)
