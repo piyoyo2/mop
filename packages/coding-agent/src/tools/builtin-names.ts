@@ -29,6 +29,15 @@ export const BUILTIN_TOOL_NAMES = [
 	"reflect",
 	"learn",
 	"manage_skill",
+	// mop domain tools: the executable form of the card-analysis checks the
+	// skills describe. Thresholds live in the skill reference files.
+	"card_budget",
+	"card_macro_check",
+	"tokenize",
+	"text_entropy",
+	"text_fingerprint",
+	"ghost_phrase_scan",
+	"library_search",
 ] as const;
 
 export type BuiltinToolName = (typeof BUILTIN_TOOL_NAMES)[number];

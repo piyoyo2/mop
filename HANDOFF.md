@@ -3,7 +3,8 @@
 **Project:** mop — a character-card authoring agent
 **Repo:** https://github.com/piyoyo2/mop
 **Fork base:** [`can1357/oh-my-pi`](https://github.com/can1357/oh-my-pi) @ `7820b7de27` (v18.12.3)
-**Status:** Milestone 1 complete and verified. Milestone 2 not started.
+**Status:** Milestone 1 complete and verified. Milestone 2 (the analyzer tools) complete and
+verified in the compiled binary. Milestone 3 not started.
 **Last updated:** 2026-10-21
 
 ---
@@ -359,6 +360,34 @@ cp packages/coding-agent/dist/mop ~/.local/bin/mop
 `vyce`); `modelRoles.default` is `vyce/gpt-6-luna`. **This copy is manual and
 first-run-hostile** — see "Next steps".
 
+### Phase 10 — Milestone 2: the analyzer tools, and `AGENTS.md`
+
+`AGENTS.md` was rewritten for mop: the domain, the skill system, the rebrand surface, the
+upstream-merge policy, and the analyzer-tool conventions. Upstream's engineering rules
+(Bun over Node, the logger, TUI sanitization, the KDL policy tree, the testing filter)
+were kept — the internals are still omp's code.
+
+Seven analyzer tools were ported from jclaw and registered as built-ins:
+`card_budget`, `card_macro_check`, `tokenize`, `text_entropy`, `text_fingerprint`,
+`ghost_phrase_scan`, `library_search`. They live in `packages/coding-agent/src/tools/card/`,
+share their constants in `domain.ts` (the executable form of the skill reference files'
+numbers), and are covered by 55 contract tests in `test/card-tools.test.ts`. All seven
+were exercised end to end through the compiled binary.
+
+The skills that use them now name them ("run `card_budget`", not "run the budget
+check"), and each tool got a root doc under `docs/tools/` — the builtin-tool docs
+coverage test requires one.
+
+Details and the decisions that differ from jclaw are in §5, "Milestone 2".
+
+**Verification:** `bun scripts/ci-test-ts.ts coding-agent-heavy` — 199 of 205 chunks passed.
+All 6 failures are the ones milestone 1 already documented as pre-existing
+(`status-line-context-cache`, `model-registry-default-config`, `move-completion`,
+`bash-interceptor`) plus two browser tests that need Chrome, which this machine does not
+have. The browser chunk is flaky under load — a second run showed 32 failures, all browser
+timeouts. No new failures. `packages/utils` was 14 red before milestone 2 (stale
+rebrand fixtures) and is green now. Lint, format, and types are clean across all packages.
+
 ---
 
 ## 3. Architecture reference
@@ -371,11 +400,22 @@ packages/coding-agent/
   src/skills/
     skills-index.ts                    corpus codec (embed / disk / shipped)
     bundled.ts                         capability provider + materialization
+  src/tools/card/                      the analyzer tools
+    domain.ts                          shared constants — the executable form of
+                                        the skill reference files' numbers
+    tokenizer.ts                       native offline BPE counter
+    card-budget.ts  card-macro-check.ts  tokenize.ts
+    text-entropy.ts  text-fingerprint.ts  ghost-phrase-scan.ts
+    library-search.ts  match-util.ts
   src/prompts/
     system/mop-system-prompt.md        the main agent skeleton
     agents/reader.md                   the read-only agent
+    tools/card-*.md  tools/tokenize.md tool descriptions
   scripts/generate-skills-index.ts     build-time corpus generator
   test/bundled-skills.test.ts          4 contract tests
+  test/card-tools.test.ts              55 contract tests
+docs/tools/card_budget.md ...          one root doc per builtin tool
+AGENTS.md                              mop's own development rules
 ```
 
 ### How a skill reaches the model
@@ -427,7 +467,25 @@ A JanitorAI card has exactly four platform-fixed boxes:
 kebab-case, descriptive, no dates or version numbers. The `lore-library` skill
 specifies the search-then-confirm protocol: search with the user's own words, **confirm
 the match with the user before reading or using a candidate**, and report a miss rather
-than guessing around it.
+than guessing around it. The `library_search` tool makes that protocol executable: it
+returns **candidates**, never a resolved file, and it matches file names before content.
+
+### The analyzer tools
+
+The skills describe checks in prose; the tools make them enforceable.
+
+| Tool | Checks | Spec |
+|---|---|---|
+| `card_budget` | the token bands for the permanent pair, a lorebook hub, a lorebook entry | `budget-bands.md` |
+| `card_macro_check` | spaced, unknown, and collapsed macros | `macro-reference.md` |
+| `tokenize` | the exact token count | — |
+| `text_entropy` | the entropy lens | `slop-scoring.md` |
+| `text_fingerprint` | the fingerprint lens | `slop-scoring.md` |
+| `ghost_phrase_scan` | the ghost-content lens | `slop-scoring.md` |
+| `library_search` | the lore library | `library-layout.md` |
+
+`domain.ts` holds the numbers, and cites the reference file each one comes from. When
+the two disagree, the reference file is the spec and `domain.ts` is the bug.
 
 ---
 
@@ -435,65 +493,78 @@ than guessing around it.
 
 | # | Item | State |
 |---|---|---|
-| 1 | **The analyzer tools** | Missing. `card_budget`, `card_macro_check`, `tokenize`, `text_entropy`, `text_fingerprint`, `ghost_phrase_scan`, `library_search`. 886 LOC to port from jclaw. The skills describe these checks in prose but there is nothing to run them with — the agent can talk about token budgets but cannot measure them, and cannot search the lore library. |
-| 2 | **Full reference-file content** | First pass only. The *facts* are right; jclaw's `peak.txt` prose (180 LOC) and the 13 lens prompts have not been ported. |
-| 3 | **Agent roster trim** | The "2 agents" design is not enforced. `reader` ships alongside omp's inherited `scout`, `reviewer`, `security-reviewer`, `seance`, `task`, `sonic`. |
-| 4 | **SDK package rename** | `sdk/{python,go,rust}/omp-rpc` still publish as `omp-rpc` — they would collide with upstream on PyPI/crates.io. |
-| 5 | **Release pipeline** | No GitHub releases exist, so `curl \| sh` cannot work yet. The installer is correct but has nothing to fetch. `mop update` still points at a build service product named `mop` that does not exist. |
-| 6 | **First-run provider migration** | mop starts with an empty `~/.mop/agent/models.yml`. The user has to copy omp's by hand (Phase 9). A `mop config migrate` that detects `~/.omp/agent/` and offers to import would remove a real papercut. |
-| 7 | **`AGENTS.md`** | Still upstream's, describing omp's package layout and omp's rules. It should be rewritten for mop. |
-| 8 | **Local provider** | `~/.mop/agent/models.yml` lists a `local` provider at `http://localhost:20128/v1`, which was not running during this session. Untested. |
+| 1 | **Full reference-file content** | First pass only. The *facts* are right; jclaw's `peak.txt` prose (180 LOC) and the 13 lens prompts have not been ported. |
+| 2 | **Agent roster trim** | The "2 agents" design is not enforced. `reader` ships alongside omp's inherited `scout`, `reviewer`, `security-reviewer`, `seance`, `task`, `sonic`. |
+| 3 | **SDK package rename** | `sdk/{python,go,rust}/omp-rpc` still publish as `omp-rpc` — they would collide with upstream on PyPI/crates.io. |
+| 4 | **Release pipeline** | No GitHub releases exist, so `curl \| sh` cannot work yet. The installer is correct but has nothing to fetch. `mop update` still points at a build service product named `mop` that does not exist. |
+| 5 | **First-run provider migration** | mop starts with an empty `~/.mop/agent/models.yml`. The user has to copy omp's by hand (Phase 9). A `mop config migrate` that detects `~/.omp/agent/` and offers to import would remove a real papercut. |
+| 6 | **Local provider** | `~/.mop/agent/models.yml` lists a `local` provider at `http://localhost:20128/v1`, which was not running during this session. Untested. |
+
+`AGENTS.md` was rewritten for mop (no longer upstream's), and the analyzer tools landed
+(Milestone 2). Both are done and no longer listed here.
 
 ---
 
 ## 5. What to do next
 
-### Milestone 2 — the analyzer tools
+### Milestone 2 — the analyzer tools — **DONE**
 
-This is the highest-value work left: it turns half the skills from *descriptions* into
-*enforceable checks*, and it unblocks the lore library.
+Seven tools, ported from jclaw and verified in the compiled binary.
 
-**Source material** — jclaw's TS tools, `/Users/westin/Desktop/jclaw/tui/packages/opencode/src/tool/`:
-
-| File | LOC | Port as |
+| Tool | What it does | Spec it implements |
 |---|---|---|
-| `card_budget.ts` | 151 | `card_budget` — the band table from `budget-bands.md` |
-| `card_macro_check.ts` | 90 | `card_macro_check` — the three failure types |
-| `tokenize.ts` | 56 | `tokenize` — real BPE (`gpt-tokenizer`) |
-| `text_entropy.ts` | 166 | `text_entropy` — the four sub-risks |
-| `text_fingerprint.ts` | 158 | `text_fingerprint` — punctuation / function words / word length |
-| `ghost_phrase_scan.ts` | 114 | `ghost_phrase_scan` — the phrase list + the contrast regex |
-| `library_search.ts` | 140 | `library_search` — search `~/.mop/agent/lore/` |
-| `match-util.ts` | 11 | shared `normalizeForMatch` |
+| `card_budget` | bands the permanent pair, a lorebook hub, and a lorebook entry against the token bands | `skills/token-economics/references/budget-bands.md` |
+| `card_macro_check` | finds spaced, unknown, and collapsed macros | `skills/macro-rules/references/macro-reference.md` |
+| `tokenize` | exact token count | — |
+| `text_entropy` | the entropy lens | `skills/forensics/references/slop-scoring.md` |
+| `text_fingerprint` | the fingerprint lens | `skills/forensics/references/slop-scoring.md` |
+| `ghost_phrase_scan` | the ghost-content lens | `skills/forensics/references/slop-scoring.md` |
+| `library_search` | searches `~/.mop/agent/lore/` and returns **candidates**, never a resolved file | `skills/lore-library/references/library-layout.md` |
 
-**Porting notes:**
+**Where they live:** `packages/coding-agent/src/tools/card/` — `domain.ts` (the shared
+constants, the executable form of the reference files' numbers), `tokenizer.ts`, and one
+file per tool. Descriptions are in `src/prompts/tools/`; root docs in `docs/tools/`.
 
-- jclaw's tools are opencode `Tool.Def` objects; omp's are classes implementing
-  `AgentTool<TParameters>` (`packages/agent/src/types.ts`) with
-  `execute(toolCallId, params, signal, onUpdate, context)`. Rewrite the shape, keep the
-  logic.
-- Register in `src/tools/builtin-names.ts` (`BUILTIN_TOOL_NAMES`) and
-  `src/tools/index.ts` (`BUILTIN_TOOLS` factory map). Descriptions live in
-  `src/prompts/tools/*.md` — never inline a description in code.
-- Use `omptype` (arktype) for the parameter schemas, per the house style.
-- `library_search` is the one that changes behaviour, not just adds a tool: it is what
-  makes the `lore-library` skill's "search before you read, then confirm the match"
-  protocol real. It should search `~/.mop/agent/lore/`, match filenames first then
-  content, and return *candidates* — never resolve a file for the agent.
-- jclaw's `card_tools.rs` (1,754 LOC) does **not** need porting. It duplicates the TS
-  tools with drifted thresholds and a `chars/4` estimator. The TS tools are the source
-  of truth. (Its *parser* — the forgiving Markdown section header handling — is worth
-  reading, but `card-file-format.md` already specifies the correct behavior.)
-- After the tools land, name them in the skills that use them, so the router says
-  "run `card_budget`" rather than "run the budget check".
+**Decisions that differ from jclaw:**
 
-**Then, in order:**
+- **The tokenizer is the native one.** jclaw used `gpt-tokenizer`; omp already ships the
+  same OpenAI BPE tables as a Rust addon (`@oh-my-pi/pi-natives`, the `utok` port) — the one
+  `mop toks` reports. Counts are identical (verified against `gpt-tokenizer` on CJK, emoji,
+  and ASCII samples), the call is synchronous, and the compiled binary is 14 MB smaller
+  without a JavaScript rank table in it. Do not add a JS tokenizer.
+- **The macro set is the double-brace one only.** jclaw also accepted single-brace `{user}`
+  as "a documented valid style"; mop's `macro-reference.md` says single braces are a
+  different template syntax. The tool follows the reference file.
+- **The macro check reports a spaced *and* an unknown finding for `{{my name}}`** — the
+  name is not a macro at all, and the spacing is a second, independent defect. jclaw's
+  regexes missed that span entirely.
+- **An empty text scores 0 on every lens.** jclaw's score functions fed zeroed metrics into
+  the sub-risk terms and returned 70/100 for an empty field.
+- **The lore root is `~/.mop/agent/lore`** via a new `getLoreDir()` in
+  `packages/utils/src/dirs.ts`.
 
-2. **Port the reference prose** from jclaw's `peak.txt` (180 LOC), `build.txt` (47),
+**Tooling notes that cost time:**
+
+- `omptype` forbids `?` plus `.default()`, and a defaulted key is *required* in the
+  schema's inferred type. Declare a defaulted field optional (`"encoding?"`) and default it
+  in code.
+- A tool description containing a literal `{{user}}` must **not** go through
+  `prompt.render` — the template engine swallows it. Static descriptions are used raw
+  (`readonly description = someDescription`), the way `context-notes.ts` does it.
+- Every builtin tool needs a root doc at `docs/tools/<name>.md`; the coverage test fails
+  without it.
+- The `mop` binary needs the native addon built (`bun run build:native`, needs ninja).
+
+**Verified:** 55 contract tests in `packages/coding-agent/test/card-tools.test.ts`, and
+all seven tools exercised end to end through the compiled binary (`mop -p`).
+
+### Milestone 3 — the rest, in order
+
+1. **Port the reference prose** from jclaw's `peak.txt` (180 LOC), `build.txt` (47),
    `review.txt` (53) and the 13 lens prompts into the existing reference files. The
    files already carry the right facts; this adds jclaw's voice and detail. Keep the
    router→reference split.
-3. **Trim the agent roster.** Remove `scout`, `reviewer`, `security-reviewer`,
+2. **Trim the agent roster.** Remove `scout`, `reviewer`, `security-reviewer`,
    `seance`, `sonic` from `EMBEDDED_AGENT_DEFS`. `task` stays (it is the `task` tool's
    default spawn agent). `seance` is the hard one — the `/seance` command,
    `seance-policy.ts`, and `structured-subagent.ts` all assume it exists; removing it
@@ -503,14 +574,13 @@ This is the highest-value work left: it turns half the skills from *descriptions
    (`glob.md`, `grep.md`, `ast-grep.md`, `task.md`,
    `task-specialization-advisory.md`) and `plan-mode-active.md` /
    `workflow-notice.md` lose their "scout" wording.
-4. **First-run provider migration.** Detect `~/.omp/agent/models.yml` and offer to
+3. **First-run provider migration.** Detect `~/.omp/agent/models.yml` and offer to
    import it into `~/.mop/agent/`. This is a small, high-value UX fix.
-5. **Release pipeline.** A GitHub Actions workflow that builds the binary for
+4. **Release pipeline.** A GitHub Actions workflow that builds the binary for
    linux/macOS × x64/arm64 and publishes `mop-<version>-<target>` assets plus
    `.sha256` sidecars, matching what the installer expects. Then `mop update` can move
    off the build-service client.
-6. **Rewrite `AGENTS.md`** for mop.
-7. **Rename the SDK packages** to `mop-rpc` (python, go, rust) so a published mop does
+5. **Rename the SDK packages** to `mop-rpc` (python, go, rust) so a published mop does
    not collide with upstream.
 
 ---
@@ -558,7 +628,20 @@ Things that are not obvious from the code and cost time to rediscover.
 - This machine has no Chrome, so the browser/puppeteer tests cannot run here.
 - `bun test` from the repo root is refused by the test runner; run it from
   `packages/coding-agent`.
-- `gpt-tokenizer` is needed for the tokenizer tool in milestone 2.
+- The token counters are the **native** ones (`@oh-my-pi/pi-natives`, the `utok` port).
+  `mop toks` prints a table across every embedded encoding, and the same native
+  `countTokens` backs the `tokenize` and `card_budget` tools. A JavaScript BPE
+  tokenizer is a duplicate of something the repo already ships — do not add one.
+- `bun install` re-resolves the whole tree when a **catalog** entry changes, and then
+  fails on `@oh-my-pi/pi-coding-agent@18.12.3` ("published within minimum release age")
+  because that version is newer than the repo's 3-day `minimumReleaseAge` policy. Edit
+  `bun.lock` by hand for catalog churn instead of re-resolving.
+- The `mop` binary needs the native addon built before it will run: `bun run build:native`
+  (needs ninja), then `bun --cwd=packages/coding-agent run build`.
+- **`packages/utils` had 14 stale test failures** left by the rebrand: the fixtures still
+  expected the app to be named `omp` (log file names, XDG app dirs, profile roots) after
+  the code had moved to `mop`. Fixed in milestone 2 — the package is green again. When the
+  rebrand's sweep is redone upstream, expect the same class of drift elsewhere.
 
 **About the domain**
 
@@ -587,7 +670,8 @@ bun run dev                                       # run from source
 # verify
 bun run check                                     # lint + format + types + rust
 bun --cwd=packages/coding-agent run test          # the test suite
-bun test packages/coding-agent/test/bundled-skills.test.ts
+cd packages/coding-agent && bun test test/bundled-skills.test.ts
+cd packages/coding-agent && bun test test/card-tools.test.ts
 
 # use
 mop                                                 # TUI
@@ -610,6 +694,10 @@ git push origin main
 | Main agent prompt | `packages/coding-agent/src/prompts/system/mop-system-prompt.md` |
 | Read-only agent | `packages/coding-agent/src/prompts/agents/reader.md` |
 | Skill delivery | `packages/coding-agent/src/skills/` |
+| Analyzer tools | `packages/coding-agent/src/tools/card/` |
+| Tool descriptions | `packages/coding-agent/src/prompts/tools/*.md` |
+| Tool root docs | `docs/tools/<name>.md` |
+| Development rules | `AGENTS.md` |
 | Config | `~/.mop/agent/` (skills materialize to `~/.mop/skills/`) |
 | Lore library | `~/.mop/agent/lore/` |
 | jclaw (the predecessor) | `/Users/westin/Desktop/jclaw` |

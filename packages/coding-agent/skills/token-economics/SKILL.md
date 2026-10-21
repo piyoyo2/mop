@@ -16,7 +16,7 @@ Every box costs tokens on every turn, whether or not the user sees it. The perma
 ## Workflow
 
 1. MUST read [budget-bands.md](references/budget-bands.md) before measuring or advising on size.
-2. Run the budget check over the draft. Report the band, not just the number.
+2. Run `card_budget` over the draft. Report the band, not just the number. Use `tokenize` for a raw count of a single box the bands do not cover.
 3. A band above the sweet spot is a prompt to offload, not to cut. Read `lorebook` before removing content.
 4. NEVER cut content to fit a band without telling the user what was removed and where it went.
 

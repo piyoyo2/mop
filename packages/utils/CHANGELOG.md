@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `getLoreDir()` to `@oh-my-pi/pi-utils`: the lore library directory (`~/.mop/agent/lore`)
+
 ### Fixed
 
 - Fixed `bun test` runs writing their logs into your real `~/.mop/logs`: test processes now log to a per-user `omp-test-logs-<uid>/` under the OS temp dir ([#16386](https://github.com/can1357/oh-my-pi/pull/16386) by [@will-bogusz](https://github.com/will-bogusz))

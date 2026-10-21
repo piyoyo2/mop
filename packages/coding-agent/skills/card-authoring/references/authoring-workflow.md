@@ -53,8 +53,8 @@ Only when the answer is non-empty. A lorebook is offload, not ceremony. Read `lo
 Before showing the draft:
 
 - Structure: required boxes present, headers recognized.
-- Budget: permanent pair in the right band; lorebook hub and entries in band.
-- Macros: no spaced, unknown, or collapsed macros.
+- Budget: permanent pair in the right band; lorebook hub and entries in band — `card_budget`.
+- Macros: no spaced, unknown, or collapsed macros — `card_macro_check`.
 - Rubric: the draft passes `anti-slop`.
 
 Then show the draft. Do not write it anywhere yet.

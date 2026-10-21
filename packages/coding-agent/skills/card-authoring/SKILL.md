@@ -22,7 +22,7 @@ Turning a concept into a card the platform can load. The platform's shape is fix
 5. MUST read [opening-message.md](references/opening-message.md) before writing the Opening Message.
 6. Write the Opening Message: a scene already in motion, ending on a moment the user can step into.
 7. Write Example Dialogue last: it demonstrates voice, it does not advance the story.
-8. Run the checks the skill names before showing the draft.
+8. Run the checks before showing the draft: `card_macro_check` over every box, `card_budget` over the permanent pair, and the `anti-slop` rubric.
 
 ## Reference files
 

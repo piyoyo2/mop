@@ -642,6 +642,17 @@ export function getAgentDir(): string {
 	return dirs.agentDir;
 }
 
+/**
+ * Get the lore library directory (~/.mop/agent/lore).
+ *
+ * The user's durable store of worldbuilding, voice profiles, and saved
+ * concepts. It is user-owned content: nothing in mop writes here without an
+ * explicit request.
+ */
+export function getLoreDir(agentDir?: string): string {
+	return dirs.agentSubdir(agentDir, "lore", "data");
+}
+
 /** Get the project-local config directory (.mop). */
 export function getProjectAgentDir(cwd: string = getProjectDir()): string {
 	return path.join(cwd, CONFIG_DIR_NAME);

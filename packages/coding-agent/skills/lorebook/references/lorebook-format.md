@@ -48,5 +48,5 @@ See `token-economics` for the full band table.
 
 - Every non-hub entry has a keyword, and the keyword appears somewhere the card can produce.
 - `key`, `keysRaw`, and `keywordsRaw` agree on every entry.
-- The hub is within budget and every entry is within budget.
+- The hub is within budget and every entry is within budget (`card_budget`).
 - No two entries contradict each other, and no entry contradicts the card's permanent boxes.

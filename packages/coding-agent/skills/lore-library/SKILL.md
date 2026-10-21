@@ -16,7 +16,7 @@ Durable material lives here, not in a card. The library is what a card is compil
 ## Workflow
 
 1. MUST read [library-layout.md](references/library-layout.md) before reading or writing anything in the library.
-2. Search before you read. Use the library search tool with the user's own words; NEVER guess a filename.
+2. Search before you read. Run `library_search` with the user's own words; NEVER guess a filename.
 3. When a search returns candidates, you MUST confirm the match with the user before you read or use one. A miss is reported, never guessed around.
 4. When saving: MUST read [save-protocol.md](references/save-protocol.md) and follow it exactly — naming, format, and the confirmation before writing.
 

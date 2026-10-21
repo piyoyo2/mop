@@ -17,7 +17,7 @@ Macros are substituted by the platform when the card is loaded. A macro written 
 
 1. MUST read [macro-reference.md](references/macro-reference.md) before writing a macro or interpreting one.
 2. When writing: use the double-brace form exactly. `{{user}}`, never `{user}`, never `{{ user }}`.
-3. When checking: run the macro check over every box. Fix the findings it reports.
+3. When checking: run `card_macro_check` over every box. Fix the findings it reports.
 4. A macro that is not in the known set does not resolve. NEVER invent one; write the literal text instead.
 
 ## Reference files

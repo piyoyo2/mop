@@ -19,7 +19,7 @@ A lorebook holds worldbuilding the card references but does not permanently carr
 2. MUST read [lorebook-example.json](references/lorebook-example.json) when you need a concrete shape to copy — a worked example with a hub and triggered entries.
 3. Write the hub entry first: the always-on core of the world, short enough to pay for on every turn.
 4. Write each conditional entry against a trigger keyword, and give it a hub it belongs under.
-5. Run the budget check over the hub and every entry.
+5. Run `card_budget` over the hub and every entry.
 6. NEVER write a lorebook without proposing it first. The user approves the structure before you fill it in.
 
 ## Reference files

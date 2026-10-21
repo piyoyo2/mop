@@ -21,7 +21,7 @@ For a requested number of rounds:
 1. Draft.
 2. Review it — the `review` skill.
 3. Fix the findings, highest impact first.
-4. Re-check: macros, budget, structure.
+4. Re-check: macros (`card_macro_check`), budget (`card_budget`), structure.
 5. Repeat until the round count is reached.
 
 Report what each round changed. A round that changed nothing is worth reporting as a round that changed nothing.

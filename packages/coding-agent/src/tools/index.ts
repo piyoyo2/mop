@@ -48,6 +48,13 @@ import { AstEditTool } from "./ast-edit";
 import { AstGrepTool } from "./ast-grep";
 import { BashTool } from "./bash";
 import { type BuiltinToolName, type HiddenToolName, normalizeToolNames } from "./builtin-names";
+import { CardBudgetTool } from "./card/card-budget";
+import { CardMacroCheckTool } from "./card/card-macro-check";
+import { GhostPhraseScanTool } from "./card/ghost-phrase-scan";
+import { LibrarySearchTool } from "./card/library-search";
+import { TextEntropyTool } from "./card/text-entropy";
+import { TextFingerprintTool } from "./card/text-fingerprint";
+import { TokenizeTool } from "./card/tokenize";
 import { type CheckpointState, CheckpointTool, type CompletedRewindState, RewindTool } from "./checkpoint";
 import { ContextNotesTool, NewContextTool } from "./context-notes";
 import { DebugTool } from "./debug";
@@ -586,6 +593,13 @@ export const BUILTIN_TOOLS: Record<BuiltinToolName, ToolFactory> = {
 	reflect: MemoryReflectTool.createIf,
 	learn: LearnTool.createIf,
 	manage_skill: ManageSkillTool.createIf,
+	card_budget: () => new CardBudgetTool(),
+	card_macro_check: () => new CardMacroCheckTool(),
+	tokenize: () => new TokenizeTool(),
+	text_entropy: () => new TextEntropyTool(),
+	text_fingerprint: () => new TextFingerprintTool(),
+	ghost_phrase_scan: () => new GhostPhraseScanTool(),
+	library_search: () => new LibrarySearchTool(),
 };
 
 export const HIDDEN_TOOLS: Record<HiddenToolName, ToolFactory> = {

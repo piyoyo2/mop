@@ -16,7 +16,7 @@ Forensics asks what is in the text. It is not a review, and it does not judge qu
 ## Workflow
 
 1. MUST read [forensics-lenses.md](references/forensics-lenses.md) before starting.
-2. Run every applicable lens. These lenses are cheap and independent — a forensic pass that skips one because it "looked fine" is not a pass.
+2. Run every applicable lens: `text_entropy` for the entropy lens, `text_fingerprint` for the fingerprint lens, and `ghost_phrase_scan` for the ghost-content lens. The bias lens has no tool — it is a reading lens. These lenses are cheap and independent — a forensic pass that skips one because it "looked fine" is not a pass.
 3. MUST read [slop-scoring.md](references/slop-scoring.md) before interpreting a score.
 4. NEVER sum the lens scores into one number. They measure different things and the sum is meaningless.
 5. Report each lens separately, with its own evidence.

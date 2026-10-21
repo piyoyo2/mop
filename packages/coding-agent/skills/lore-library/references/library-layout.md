@@ -40,7 +40,7 @@ Markdown, with a `#` heading naming the entry as its title, then the content. En
 
 ## Searching
 
-Use the library search tool with the user's own words. It matches filenames first, then falls back to full content, and returns candidates with a snippet — it never resolves a file for you.
+Use `library_search` with the user's own words. It matches filenames first, then falls back to full content, and returns candidates with a snippet — it never resolves a file for you.
 
 **Always confirm the match with the user before reading or using a candidate.** If the search finds nothing, report that. Do not pick the closest thing and proceed.
 

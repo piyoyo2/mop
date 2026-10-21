@@ -28,7 +28,7 @@ A review runs the lenses that apply and says which it skipped and why. A lens wi
 
 ## Macros
 
-**Checks:** macro correctness. Spaced forms, unknown macros, the "the user" collapse.
+**Checks:** macro correctness. Spaced forms, unknown macros, the "the user" collapse. Run `card_macro_check` over each box.
 
 **Finds:** the macro, the box, and what it will render as.
 
@@ -40,7 +40,7 @@ A review runs the lenses that apply and says which it skipped and why. A lens wi
 
 ## Structure
 
-**Checks:** the shape. Required boxes present, the Scenario frozen into a scene rather than a situation, the Opening Message handing the user a moment, token bands.
+**Checks:** the shape. Required boxes present, the Scenario frozen into a scene rather than a situation, the Opening Message handing the user a moment, token bands. Run `card_budget` for the bands.
 
 **Finds:** the box, the rule it breaks, and the band it lands in.
 

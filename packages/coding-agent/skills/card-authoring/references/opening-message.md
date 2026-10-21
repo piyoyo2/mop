@@ -27,4 +27,4 @@ An opening message is a scene, not a summary. It should read like the first scre
 
 ## Checks
 
-Read the message back against the six rules above, then run the macro check over it. A hook that references `{{user}}` incorrectly still lands wrong.
+Read the message back against the six rules above, then run `card_macro_check` over it. A hook that references `{{user}}` incorrectly still lands wrong.
